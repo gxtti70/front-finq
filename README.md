@@ -1,59 +1,41 @@
-# FrontFinq
+# FinQ - Frontend 🚀
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.5.
+<div align="center">
+  <img src="https://img.shields.io/badge/status-en%20desarrollo-yellow?style=for-the-badge" alt="Estado">
+  <img src="https://img.shields.io/badge/angular-%23DD0031.svg?style=for-the-badge&logo=angular&logoColor=white" alt="Angular">
+  <img src="https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS">
+</div>
 
-## Development server
+---
 
-To start a local development server, run:
+## ⚠️ Estado del Proyecto
+> **Nota:** Este proyecto se encuentra actualmente en **fase de desarrollo**. Estamos trabajando en la integración completa de módulos y la optimización de la experiencia de usuario.
 
+## 📝 Descripción
+**FinQ** es una aplicación web de gestión financiera personal diseñada para ayudar a los usuarios a registrar sus ingresos y gastos de manera intuitiva. El frontend utiliza las últimas características de **Angular 19**, como los **Signals** para un manejo de estado reactivo y ultra rápido.
+
+## Características Principales
+* **Dashboard Dinámico:** Resumen visual de saldo, ingresos (verdes) y gastos (rojos).
+* **Gestión de Transacciones:** Registro de movimientos con clasificación por categorías.
+* **Sugerencias Rápidas:** Botones inteligentes para gastos frecuentes (Netflix, Servicios, etc.).
+* **Glassmorphism UI:** Interfaz moderna con fondos borrosos y diseño responsivo.
+
+## 🛠️ Stack Tecnológico
+* **Framework:** Angular 19
+* **Manejo de Estado:** Angular Signals
+* **Estilos:** Tailwind CSS
+* **API:** Integración con Spring Boot (back-finq)
+
+## 🚧 Próximos Pasos (Roadmap)
+- [ ] Implementación de Gráficos de torta para gastos por categoría.
+- [ ] Sistema de Autenticación (Login/Register).
+- [ ] Reportes exportables en PDF.
+- [ ] Modo oscuro (Dark Mode).
+
+## 🚀 Instalación
 ```bash
+git clone [https://github.com/gxtti70/front-finq.git](https://github.com/gxtti70/front-finq.git)
+cd front-finq
+npm install
 ng serve
-```
-
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
