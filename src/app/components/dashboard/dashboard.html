@@ -1,39 +1,32 @@
 <div class="space-y-6 animate-fade-in">
   
-  <!-- Encabezado del Dashboard -->
   <div class="flex items-center justify-between">
     <div>
-     <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Hola, Santiago</h2>
-      <p class="text-sm text-gray-500 mt-1">Aquí está el resumen de tus finanzas</p>
+      <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Hola, Santiago</h2>
+      <p class="text-sm text-gray-500 mt-1">Aquí está el resumen de tus finanzas hoy</p>
     </div>
-    <button (click)="abrirModal()" class="bg-finq-primary hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 shadow-sm">
-      <i class='bx bx-plus text-lg'></i> Nuevo Gasto
+    <button (click)="abrirModal()" class="bg-finq-primary hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-lg shadow-indigo-100">
+      <i class='bx bx-plus-circle text-lg'></i> Nuevo Movimiento
     </button>
   </div>
 
-  <!-- Tarjetas de Resumen (Grid) -->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    
-    <!-- Tarjeta Saldo Total (Se queda igual) -->
-    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm relative overflow-hidden">
+    <div class="bg-gray-900 p-6 rounded-3xl shadow-xl relative overflow-hidden text-white">
       <div class="flex items-center justify-between z-10 relative">
-        <p class="text-sm font-medium text-gray-500">Saldo Total</p>
-        <div class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center">
-          <i class='bx bx-wallet text-finq-primary text-xl'></i>
-        </div>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Saldo Disponible</p>
+        <i class='bx bx-wallet text-finq-primary text-2xl'></i>
       </div>
-      <p class="text-3xl font-bold text-gray-900 mt-4 z-10 relative">
+      <p class="text-3xl font-black mt-4 z-10 relative">
         {{ saldoTotal() | currency:'COP':'symbol-narrow':'1.0-0' }}
       </p>
-      <div class="absolute -bottom-6 -right-6 w-24 h-24 bg-finq-primary opacity-5 rounded-full z-0"></div>
+      <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-finq-primary opacity-20 rounded-full blur-3xl"></div>
     </div>
 
-    <!-- TARJETA GASTOS (AHORA A LA IZQUIERDA) -->
-    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm group hover:border-rose-100 transition-all">
       <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-500">Gastos del mes</p>
-        <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
-          <i class='bx bx-trending-down text-red-600 text-xl'></i>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Gastos del mes</p>
+        <div class="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <i class='bx bx-trending-down text-rose-500 text-xl'></i>
         </div>
       </div>
       <p class="text-2xl font-bold text-gray-900 mt-4">
@@ -41,139 +34,149 @@
       </p>
     </div>
 
-    <!-- TARJETA INGRESOS (AHORA A LA DERECHA) -->
-    <div class="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
+    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm group hover:border-emerald-100 transition-all">
       <div class="flex items-center justify-between">
-        <p class="text-sm font-medium text-gray-500">Ingresos del mes</p>
-        <div class="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
-          <i class='bx bx-trending-up text-green-600 text-xl'></i>
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Ingresos del mes</p>
+        <div class="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <i class='bx bx-trending-up text-emerald-500 text-xl'></i>
         </div>
       </div>
       <p class="text-2xl font-bold text-gray-900 mt-4">
         {{ ingresos() | currency:'COP':'symbol-narrow':'1.0-0' }}
       </p>
     </div>
-
   </div>
 
-</div>
-
-<!-- Sección: Gastos por Aplicación (Sin cambios) -->
-<div class="mt-10">
-  <div class="flex items-center justify-between mb-4">
-    <h3 class="text-lg font-bold text-gray-900 tracking-tight">Gastos por Aplicación</h3>
-    <a href="#" class="text-sm font-medium text-finq-primary hover:text-indigo-800 transition-colors">Ver todas</a>
-  </div>
-
-  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-    <div class="divide-y divide-gray-100">
-      @for (app of gastosAplicaciones(); track app.nombre) {
-        <div class="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors cursor-pointer group">
-          <div class="flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105 {{app.bg}}">
-              @if (app.imgUrl) {
-                <img [src]="app.imgUrl" alt="{{app.nombre}}" class="w-6 h-6 object-contain">
-              } @else {
-                <i class='bx {{app.icono}} text-3xl {{app.color}}'></i>
-              }
-            </div>
-            <div>
-              <p class="font-semibold text-gray-900">{{app.nombre}}</p>
-              <p class="text-xs font-medium text-gray-500">{{app.plan}}</p>
-            </div>
-          </div>
-          <div class="text-right">
-            <p class="font-bold text-gray-900">{{app.monto | currency:'COP':'symbol-narrow':'1.0-0'}}</p>
-            <p class="text-xs text-gray-400">Mensual</p>
-          </div>
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div class="lg:col-span-2 bg-white p-6 rounded-3xl border border-gray-100 shadow-sm">
+      <div class="flex items-center justify-between mb-8">
+        <div>
+          <h3 class="font-bold text-gray-900">Flujo de Efectivo</h3>
+          <p class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Análisis semestral</p>
         </div>
-      }
+        <div class="flex gap-2">
+          <span class="flex items-center gap-1 text-[10px] font-bold text-emerald-500">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span> Ingresos
+          </span>
+          <span class="flex items-center gap-1 text-[10px] font-bold text-rose-500">
+            <span class="w-2 h-2 rounded-full bg-rose-500"></span> Gastos
+          </span>
+        </div>
+      </div>
+      <div class="h-64 relative">
+        <canvas #finqChart></canvas>
+      </div>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm flex flex-col">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="font-bold text-gray-900">Suscripciones</h3>
+        <a href="#" class="text-[10px] font-bold text-finq-primary uppercase hover:underline">Ver todas</a>
+      </div>
+      <div class="space-y-4 flex-1">
+        @for (app of gastosAplicaciones().slice(0, 5); track app.nombre) {
+          <div class="flex items-center justify-between group cursor-pointer">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center {{app.bg}} transition-transform group-hover:scale-105">
+                @if (app.imgUrl) {
+                  <img [src]="app.imgUrl" alt="{{app.nombre}}" class="w-5 h-5 object-contain">
+                } @else {
+                  <i class='bx {{app.icono}} text-2xl {{app.color}}'></i>
+                }
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-800">{{app.nombre}}</p>
+                <p class="text-[10px] text-gray-400 font-medium">{{app.plan}}</p>
+              </div>
+            </div>
+            <p class="text-xs font-bold text-gray-900">{{app.monto | currency:'COP':'symbol-narrow':'1.0-0'}}</p>
+          </div>
+        }
+      </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL ACTUALIZADO -->
 @if (mostrarModal()) {
-  <div class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
-    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden border border-white/20">
-      <div class="flex justify-between items-center p-6 pb-4">
-        <h3 class="text-xl font-bold text-gray-900">Registrar Movimiento</h3>
-        <button (click)="cerrarModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition-colors">
+  <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-slide-up">
+      <div class="flex justify-between items-center p-6 border-b border-gray-50">
+        <h3 class="text-xl font-bold text-gray-900 tracking-tight">Nuevo Movimiento</h3>
+        <button (click)="cerrarModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-800 transition-all">
           <i class='bx bx-x text-xl'></i>
         </button>
       </div>
-
-      <div class="p-6 pt-0">
-        <form (ngSubmit)="guardarTransaccion()">
-          
-          <div class="mb-6">
-            <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Sugerencias Rápidas</label>
+      <div class="p-6">
+        <form (ngSubmit)="guardarTransaccion()" class="space-y-5">
+          <div>
+            <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Atajos de gasto</label>
             <div class="flex flex-wrap gap-2">
-              @for (gasto of gastosRapidos; track gasto.nombre) {
+              @for (gasto of gastosRapidos.slice(0, 4); track gasto.nombre) {
                 <button type="button" (click)="seleccionarGastoRapido(gasto)" 
-                  class="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 hover:bg-indigo-50 border border-gray-200 hover:border-indigo-200 rounded-xl text-sm font-medium text-gray-700 transition-all">
-                  <i class='bx {{gasto.icono}} {{gasto.color}} text-lg'></i>
+                  class="flex items-center gap-1.5 px-3 py-2 bg-gray-50 hover:bg-white hover:shadow-md border border-gray-100 rounded-xl text-xs font-bold text-gray-700 transition-all active:scale-95">
+                  <i class='bx {{gasto.icono}} {{gasto.color}} text-base'></i>
                   {{gasto.nombre}}
                 </button>
               }
             </div>
           </div>
-
-          <!-- Selector de Tipo (Lados cambiados: Ingreso izquierda, Gasto derecha) -->
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Movimiento</label>
-            <div class="flex p-1 bg-gray-100 rounded-xl">
-              <!-- INGRESO AHORA A LA IZQUIERDA -->
+          <div>
+            <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 text-center">Tipo de operación</label>
+            <div class="flex p-1.5 bg-gray-100 rounded-2xl">
               <label class="flex-1 text-center cursor-pointer">
-                 <input type="radio" name="tipo" [(ngModel)]="nuevaTransaccion.tipo" value="GASTO" class="peer sr-only">
-                   <div class="flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium text-gray-500 peer-checked:bg-white peer-checked:text-gray-900 peer-checked:shadow-sm transition-all">
-                  <i class='bx bx-trending-up text-xl text-green-500'></i> Ingreso
+                <input type="radio" name="tipo" [(ngModel)]="nuevaTransaccion.tipo" value="GASTO" class="peer sr-only">
+                <div class="py-2.5 rounded-xl text-xs font-black text-gray-500 peer-checked:bg-white peer-checked:text-emerald-600 peer-checked:shadow-sm transition-all flex items-center justify-center gap-2">
+                  <i class='bx bx-plus-circle text-lg'></i> Ingreso
                 </div>
               </label>
-              <!-- GASTO AHORA A LA DERECHA -->
               <label class="flex-1 text-center cursor-pointer">
-                 <input type="radio" name="tipo" [(ngModel)]="nuevaTransaccion.tipo" value="INGRESO" class="peer sr-only">
-               
-                  <div class="flex items-center justify-center gap-2 py-2 px-4 rounded-lg text-sm font-medium text-gray-500 peer-checked:bg-white peer-checked:text-gray-900 peer-checked:shadow-sm transition-all">
-                  <i class='bx bx-trending-down text-xl text-red-500'></i> Gasto
+                <input type="radio" name="tipo" [(ngModel)]="nuevaTransaccion.tipo" value="INGRESO" class="peer sr-only">
+                <div class="py-2.5 rounded-xl text-xs font-black text-gray-500 peer-checked:bg-white peer-checked:text-rose-600 peer-checked:shadow-sm transition-all flex items-center justify-center gap-2">
+                  <i class='bx bx-minus-circle text-lg'></i> Gasto
                 </div>
               </label>
             </div>
           </div>
-
-          <div class="mb-5">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Descripción</label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <i class='bx bx-text text-gray-400 text-lg'></i>
-              </div>
-              <input type="text" name="descripcion" [(ngModel)]="nuevaTransaccion.descripcion" placeholder="¿En qué gastaste o qué recibiste?" required
-                class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-finq-primary focus:border-finq-primary outline-none transition-all text-sm">
+          <div class="relative">
+            <input type="text" name="descripcion" [(ngModel)]="nuevaTransaccion.descripcion" placeholder="Concepto (ej: Pago Nómina)" required
+              class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-finq-primary/10 focus:border-finq-primary outline-none transition-all text-sm font-medium">
+          </div>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+              <span class="text-gray-400 font-bold">$</span>
             </div>
+            <input type="number" name="monto" [(ngModel)]="nuevaTransaccion.monto" placeholder="Monto" required
+              class="w-full pl-8 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-finq-primary/10 focus:border-finq-primary outline-none transition-all text-2xl font-black text-gray-900">
           </div>
-
-          <div class="mb-8">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Monto ($)</label>
-            <div class="relative">
-              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span class="text-gray-400 font-medium">$</span>
-              </div>
-              <input type="number" name="monto" [(ngModel)]="nuevaTransaccion.monto" placeholder="0" required
-                class="w-full pl-8 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-finq-primary focus:border-finq-primary outline-none transition-all text-lg font-semibold text-gray-900">
-            </div>
-          </div>
-
-          <div class="flex gap-3">
-            <button type="button" (click)="cerrarModal()" class="flex-1 py-3 text-sm font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
-              Cancelar
-            </button>
-            <button type="submit" class="flex-2 w-2/3 py-3 text-sm font-bold text-white bg-finq-primary hover:bg-indigo-700 rounded-xl shadow-md shadow-indigo-200 transition-all flex items-center justify-center gap-2">
-              <i class='bx bx-check-circle text-lg'></i> Guardar Movimiento
-            </button>
-          </div>
-
+          <button type="submit" class="w-full py-4 bg-finq-primary text-white rounded-2xl font-black text-sm shadow-xl shadow-indigo-100 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+            Confirmar Registro
+          </button>
         </form>
       </div>
+    </div>
+  </div>
+}
+
+@if (notificacion().mostrar) {
+  <div class="fixed top-20 right-4 z-[110] animate-fade-in">
+    <div class="flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border backdrop-blur-md transition-all"
+         [class.bg-emerald-500/90]="notificacion().exito"
+         [class.border-emerald-400]="notificacion().exito"
+         [class.bg-rose-500/90]="!notificacion().exito"
+         [class.border-rose-400]="!notificacion().exito">
+      
+      <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white">
+        <i class='bx' [class.bx-check-circle]="notificacion().exito" [class.bx-error-circle]="!notificacion().exito"></i>
+      </div>
+      
+      <div class="pr-2">
+        <p class="text-[10px] font-black text-white uppercase tracking-widest opacity-80">Notificación</p>
+        <p class="text-sm font-bold text-white leading-tight">{{ notificacion().mensaje }}</p>
+      </div>
+
+      <button (click)="notificacion.update(p => ({...p, mostrar: false}))" class="text-white/50 hover:text-white transition-colors">
+        <i class='bx bx-x text-lg'></i>
+      </button>
     </div>
   </div>
 }
