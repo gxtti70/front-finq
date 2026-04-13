@@ -1,7 +1,10 @@
 import { Component, signal } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router'; // <-- Esta es la única que necesitamos
 
 @Component({
   selector: 'app-navbar',
+  standalone: true, // Importante para Angular 19
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './navbar.html'
 })
 export class NavbarComponent {

@@ -1,0 +1,105 @@
+<div class="space-y-6 animate-fade-in">
+  
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Historial de Movimientos</h2>
+      <p class="text-sm text-gray-500 mt-1">Filtra y revisa el detalle de tus finanzas</p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <div class="relative flex-1 md:w-64">
+        <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg'></i>
+        <input 
+          type="text" 
+          [ngModel]="filtroTexto()" 
+          (ngModelChange)="filtroTexto.set($event)"
+          placeholder="Buscar descripción..."
+          class="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-finq-primary focus:border-finq-primary outline-none transition-all shadow-sm"
+        >
+      </div>
+
+      <select 
+        [ngModel]="filtroTipo()" 
+        (ngModelChange)="filtroTipo.set($event)"
+        class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-finq-primary outline-none cursor-pointer shadow-sm border-gray-200"
+      >
+        <option value="TODOS">Todos</option>
+        <option value="INGRESO">Ingresos</option>
+        <option value="GASTO">Gastos</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    
+    @if (cargando()) {
+      <div class="p-12 flex flex-col items-center justify-center text-gray-400">
+        <i class='bx bx-loader-alt bx-spin text-4xl mb-4 text-finq-primary'></i>
+        <p>Cargando tus movimientos...</p>
+      </div>
+    } 
+
+    @else if (historial().length === 0) {
+      <div class="p-12 flex flex-col items-center justify-center text-gray-400 text-center">
+        <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
+          <i class='bx bx-receipt text-3xl'></i>
+        </div>
+        <p class="text-gray-900 font-medium">Aún no tienes movimientos</p>
+        <p class="text-sm px-4">Registra tu primer ingreso o gasto en el Dashboard para empezar.</p>
+      </div>
+    } 
+
+    @else if (movimientosFiltrados().length === 0) {
+      <div class="p-12 flex flex-col items-center justify-center text-gray-400 text-center">
+        <i class='bx bx-search-alt text-4xl mb-4 opacity-20'></i>
+        <p class="text-gray-900 font-medium">No se encontraron resultados</p>
+        <p class="text-sm px-4">Prueba ajustando los filtros o buscando otra palabra.</p>
+        <button (click)="filtroTexto.set(''); filtroTipo.set('TODOS')" 
+                class="mt-4 text-finq-primary font-semibold text-sm hover:underline">
+          Limpiar filtros
+        </button>
+      </div>
+    } 
+
+    @else {
+      <div class="divide-y divide-gray-100">
+        @for (mov of movimientosFiltrados(); track mov.id) {
+          
+          <div class="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors group">
+            
+            <div class="flex items-center gap-4">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
+                   [class.bg-green-50]="esIngreso(mov)"
+                   [class.bg-red-50]="!esIngreso(mov)">
+                <i class='bx text-2xl'
+                   [class.bx-trending-up]="esIngreso(mov)"
+                   [class.text-green-600]="esIngreso(mov)"
+                   [class.bx-trending-down]="!esIngreso(mov)"
+                   [class.text-red-500]="!esIngreso(mov)"></i>
+              </div>
+              
+              <div>
+                <p class="font-semibold text-gray-900 capitalize">{{ mov.descripcion }}</p>
+                <p class="text-xs font-medium text-gray-500">{{ mov.fechaTransaccion | date:'mediumDate' }}</p>
+              </div>
+            </div>
+
+            <div class="text-right">
+              <p class="font-bold"
+                 [class.text-green-600]="esIngreso(mov)"
+                 [class.text-gray-900]="!esIngreso(mov)">
+                {{ esIngreso(mov) ? '+' : '-' }} {{ mov.monto | currency:'COP':'symbol-narrow':'1.0-0' }}
+              </p>
+              <p class="text-xs font-medium text-gray-400">
+                {{ esIngreso(mov) ? 'Ingreso' : 'Gasto' }}
+              </p>
+            </div>
+
+          </div>
+
+        }
+      </div>
+    }
+  </div>
+
+</div>
