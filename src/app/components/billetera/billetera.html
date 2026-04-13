@@ -1,0 +1,35 @@
+<div class="space-y-8 animate-fade-in">
+  <h2 class="text-2xl font-bold text-gray-900">Mis Cuentas</h2>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    @for (cuenta of cuentas(); track cuenta.nombre) {
+      <div class="relative h-48 rounded-3xl p-6 text-white shadow-xl overflow-hidden bg-gradient-to-br {{ cuenta.color }} transition-transform hover:scale-105 cursor-pointer">
+        <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
+        
+        <div class="flex flex-col h-full justify-between relative z-10">
+          <div class="flex justify-between items-start">
+            <span class="text-xs font-bold uppercase tracking-widest opacity-80">{{ cuenta.nombre }}</span>
+            <i class='bx bx-chip text-3xl opacity-90'></i>
+          </div>
+          
+          <div>
+            <p class="text-xs opacity-70 mb-1">Saldo Disponible</p>
+            <p class="text-2xl font-black tracking-tight">
+              {{ cuenta.saldo | currency:'COP':'symbol-narrow':'1.0-0' }}
+            </p>
+          </div>
+
+          <div class="flex justify-between items-end">
+            <span class="text-sm font-mono opacity-80">{{ cuenta.numero }}</span>
+            <i class='bx bxl-visa text-4xl opacity-50'></i>
+          </div>
+        </div>
+      </div>
+    }
+
+    <div class="h-48 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 hover:border-finq-primary hover:text-finq-primary transition-all cursor-pointer group">
+      <i class='bx bx-plus-circle text-4xl mb-2 group-hover:animate-bounce'></i>
+      <span class="font-bold text-sm">Vincular cuenta</span>
+    </div>
+  </div>
+</div>
