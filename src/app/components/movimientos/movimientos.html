@@ -1,13 +1,20 @@
 <div class="space-y-6 animate-fade-in">
   
-  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-    <div>
-      <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Historial de Movimientos</h2>
-      <p class="text-sm text-gray-500 mt-1">Filtra y revisa el detalle de tus finanzas</p>
+  <div class="flex flex-col gap-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+          Historial de Movimientos
+          <span class="text-sm font-medium bg-gray-100 text-gray-600 px-2.5 py-0.5 rounded-full">
+            {{ movimientosFiltrados().length }} registros
+          </span>
+        </h2>
+        <p class="text-sm text-gray-500 mt-1">Control detallado de tus finanzas por tiempo y categoría</p>
+      </div>
     </div>
 
-    <div class="flex items-center gap-3">
-      <div class="relative flex-1 md:w-64">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="relative">
         <i class='bx bx-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-lg'></i>
         <input 
           type="text" 
@@ -19,26 +26,71 @@
       </div>
 
       <select 
+        [ngModel]="filtroMes()" 
+        (ngModelChange)="filtroMes.set($event)"
+        class="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-finq-primary outline-none cursor-pointer shadow-sm border-gray-200"
+      >
+        <option value="TODOS">Todos los meses</option>
+        @for (m of meses; track m.id) {
+          <option [value]="m.id">{{ m.nombre }}</option>
+        }
+      </select>
+
+      <select 
+        [ngModel]="filtroSemana()" 
+        (ngModelChange)="filtroSemana.set($event)"
+        class="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-finq-primary outline-none cursor-pointer shadow-sm border-gray-200"
+      >
+        <option value="TODOS">Todas las semanas</option>
+        @for (sem of [].constructor(52); track $index) {
+          <option [value]="$index + 1">Semana {{ $index + 1 }}</option>
+        }
+      </select>
+
+      <select 
         [ngModel]="filtroTipo()" 
         (ngModelChange)="filtroTipo.set($event)"
-        class="px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-finq-primary outline-none cursor-pointer shadow-sm border-gray-200"
+        class="w-full px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 focus:ring-2 focus:ring-finq-primary outline-none cursor-pointer shadow-sm border-gray-200"
       >
-        <option value="TODOS">Todos</option>
+        <option value="TODOS">Ingresos y Gastos</option>
         <option value="INGRESO">Ingresos</option>
         <option value="GASTO">Gastos</option>
       </select>
     </div>
   </div>
 
-  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-    
+  @if (!cargando() && movimientosFiltrados().length > 0) {
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl shadow-sm">
+        <p class="text-[10px] font-bold text-emerald-600 uppercase tracking-widest">Ingresos filtrados</p>
+        <p class="text-xl font-bold text-emerald-700 mt-1">
+          + {{ totalIngresos() | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </p>
+      </div>
+
+      <div class="bg-rose-50 border border-rose-100 p-4 rounded-2xl shadow-sm">
+        <p class="text-[10px] font-bold text-rose-600 uppercase tracking-widest">Gastos filtrados</p>
+        <p class="text-xl font-bold text-rose-700 mt-1">
+          - {{ totalGastos() | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </p>
+      </div>
+
+      <div class="bg-gray-50 border border-gray-200 p-4 rounded-2xl shadow-sm">
+        <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Balance del periodo</p>
+        <p class="text-xl font-bold mt-1" [class.text-emerald-600]="balanceFiltrado() >= 0" [class.text-rose-600]="balanceFiltrado() < 0">
+          {{ balanceFiltrado() | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </p>
+      </div>
+    </div>
+  }
+
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden min-h-[200px]">
     @if (cargando()) {
       <div class="p-12 flex flex-col items-center justify-center text-gray-400">
         <i class='bx bx-loader-alt bx-spin text-4xl mb-4 text-finq-primary'></i>
         <p>Cargando tus movimientos...</p>
       </div>
     } 
-
     @else if (historial().length === 0) {
       <div class="p-12 flex flex-col items-center justify-center text-gray-400 text-center">
         <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mb-4">
@@ -48,58 +100,111 @@
         <p class="text-sm px-4">Registra tu primer ingreso o gasto en el Dashboard para empezar.</p>
       </div>
     } 
-
     @else if (movimientosFiltrados().length === 0) {
       <div class="p-12 flex flex-col items-center justify-center text-gray-400 text-center">
-        <i class='bx bx-search-alt text-4xl mb-4 opacity-20'></i>
-        <p class="text-gray-900 font-medium">No se encontraron resultados</p>
-        <p class="text-sm px-4">Prueba ajustando los filtros o buscando otra palabra.</p>
-        <button (click)="filtroTexto.set(''); filtroTipo.set('TODOS')" 
-                class="mt-4 text-finq-primary font-semibold text-sm hover:underline">
-          Limpiar filtros
+        <i class='bx bx-calendar-x text-5xl mb-4 opacity-10'></i>
+        <p class="text-gray-900 font-medium">No hay registros para este filtro</p>
+        <button (click)="limpiarFiltros()" class="mt-4 text-finq-primary font-semibold text-sm hover:underline">
+          Reiniciar búsqueda
         </button>
       </div>
     } 
-
     @else {
       <div class="divide-y divide-gray-100">
         @for (mov of movimientosFiltrados(); track mov.id) {
-          
-          <div class="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors group">
+          <div (click)="verDetalle(mov)" 
+               class="p-4 flex items-center justify-between hover:bg-gray-50 transition-colors group cursor-pointer">
             
             <div class="flex items-center gap-4">
-              <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
-                   [class.bg-green-50]="esIngreso(mov)"
-                   [class.bg-red-50]="!esIngreso(mov)">
+              <div class="w-11 h-11 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105"
+                   [class.bg-emerald-50]="esIngreso(mov)"
+                   [class.bg-rose-50]="!esIngreso(mov)">
                 <i class='bx text-2xl'
                    [class.bx-trending-up]="esIngreso(mov)"
-                   [class.text-green-600]="esIngreso(mov)"
+                   [class.text-emerald-600]="esIngreso(mov)"
                    [class.bx-trending-down]="!esIngreso(mov)"
-                   [class.text-red-500]="!esIngreso(mov)"></i>
+                   [class.text-rose-500]="!esIngreso(mov)"></i>
               </div>
               
               <div>
-                <p class="font-semibold text-gray-900 capitalize">{{ mov.descripcion }}</p>
-                <p class="text-xs font-medium text-gray-500">{{ mov.fechaTransaccion | date:'mediumDate' }}</p>
+                <p class="font-semibold text-gray-900 text-sm capitalize">{{ mov.descripcion }}</p>
+                <p class="text-[10px] font-medium text-gray-400 uppercase tracking-tighter">{{ mov.fechaTransaccion | date:'fullDate' }}</p>
               </div>
             </div>
 
-            <div class="text-right">
-              <p class="font-bold"
-                 [class.text-green-600]="esIngreso(mov)"
-                 [class.text-gray-900]="!esIngreso(mov)">
-                {{ esIngreso(mov) ? '+' : '-' }} {{ mov.monto | currency:'COP':'symbol-narrow':'1.0-0' }}
-              </p>
-              <p class="text-xs font-medium text-gray-400">
-                {{ esIngreso(mov) ? 'Ingreso' : 'Gasto' }}
-              </p>
+            <div class="text-right flex items-center gap-3">
+              <div>
+                <p class="text-sm font-bold"
+                   [class.text-emerald-600]="esIngreso(mov)"
+                   [class.text-gray-900]="!esIngreso(mov)">
+                  {{ esIngreso(mov) ? '+' : '-' }} {{ mov.monto | currency:'COP':'symbol-narrow':'1.0-0' }}
+                </p>
+                <p class="text-[10px] font-bold text-gray-300 uppercase tracking-tighter">
+                  {{ esIngreso(mov) ? 'Entrada' : 'Salida' }}
+                </p>
+              </div>
+              <i class='bx bx-chevron-right text-gray-300 group-hover:text-gray-400 transition-colors text-xl'></i>
             </div>
-
           </div>
-
         }
       </div>
     }
   </div>
 
 </div>
+
+@if (transaccionSeleccionada(); as mov) {
+  <div class="fixed inset-0 z-[60] flex items-center justify-center p-4 animate-fade-in">
+    <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" (click)="cerrarModal()"></div>
+    
+    <div class="relative bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-slide-up">
+      
+      <div class="p-8 text-center" 
+           [class.bg-emerald-50]="esIngreso(mov)" 
+           [class.bg-rose-50]="!esIngreso(mov)">
+        
+        <button (click)="cerrarModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
+          <i class='bx bx-x text-2xl'></i>
+        </button>
+
+        <div class="w-16 h-16 mx-auto bg-white rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+          <i class='bx text-3xl' 
+             [class.bx-trending-up]="esIngreso(mov)" [class.text-emerald-600]="esIngreso(mov)"
+             [class.bx-trending-down]="!esIngreso(mov)" [class.text-rose-500]="!esIngreso(mov)"></i>
+        </div>
+        
+        <h3 class="text-lg font-bold text-gray-900 capitalize">{{ mov.descripcion }}</h3>
+        <p class="text-2xl font-black mt-1" 
+           [class.text-emerald-600]="esIngreso(mov)" 
+           [class.text-rose-600]="!esIngreso(mov)">
+          {{ esIngreso(mov) ? '+' : '-' }} {{ mov.monto | currency:'COP':'symbol-narrow':'1.0-0' }}
+        </p>
+      </div>
+
+      <div class="p-6 space-y-5">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Fecha Exacta</p>
+            <p class="text-xs font-semibold text-gray-700 mt-1">{{ mov.fechaTransaccion | date:'longDate' }}</p>
+          </div>
+          <div>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Categoría</p>
+            <span class="inline-block px-2 py-0.5 rounded-lg text-[10px] font-bold bg-gray-100 text-gray-600 mt-1">
+              {{ mov.categoria?.nombre || 'Sin categoría' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-gray-100">
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Referencia interna</p>
+          <p class="text-[9px] font-mono text-gray-300 break-all select-all">{{ mov.id }}</p>
+        </div>
+
+        <button (click)="cerrarModal()" 
+                class="w-full py-3.5 bg-gray-900 text-white rounded-2xl font-bold text-xs hover:bg-gray-800 transition-all shadow-lg active:scale-95">
+          Cerrar Detalle
+        </button>
+      </div>
+    </div>
+  </div>
+}
