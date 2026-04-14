@@ -8,20 +8,59 @@
         
         <div class="flex flex-col h-full justify-between relative z-10">
           <div class="flex justify-between items-start">
-            <span class="text-xs font-bold uppercase tracking-widest opacity-80">{{ cuenta.nombre }}</span>
-            <i class='bx bx-chip text-3xl opacity-90 group-hover:rotate-12 transition-transform'></i>
+            <div class="flex flex-col">
+              <span class="text-[10px] font-bold uppercase tracking-widest opacity-70 mb-2">{{ cuenta.nombre }}</span>
+              
+              <div class="w-10 h-10 bg-white/20 backdrop-blur-md rounded-xl flex items-center justify-center p-2 border border-white/30">
+                @if (cuenta.icon === 'CUSTOM_BANCOLOMBIA') {
+                  <svg class="w-full h-full object-contain brightness-0 invert" viewBox="0 0 800 802" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                    <g transform="translate(0.000000,802.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+                      <path d="M5920 8004 c-14 -7 -45 -14 -69 -14 -24 0 -71 -4 -105 -10 -56 -9 -171 -25 -371 -51 -44 -6 -102 -14 -130 -19 -27 -5 -99 -16 -160 -25 -200 -29 -365 -54 -425 -65 -25 -5 -90 -16 -145 -25 -145 -23 -421 -72 -535 -95 -25 -5 -85 -16 -135 -25 -49 -9 -124 -23 -165 -32 -41 -9 -93 -19 -115 -23 -22 -4 -74 -15 -115 -24 -41 -8 -109 -22 -150 -31 -150 -30 -376 -81 -426 -96 -17 -5 -40 -9 -52 -9 -11 0 -31 -4 -44 -9 -13 -5 -59 -17 -103 -27 -44 -9 -132 -30 -195 -47 -63 -16 -133 -33 -155 -38 -164 -39 -288 -71 -440 -114 -49 -14 -106 -30 -125 -35 -136 -37 -228 -63 -248 -71 -13 -5 -32 -9 -43 -9 -11 0 -48 -13 -83 -29 -66 -31 -158 -119 -185 -177 -7 -16 -17 -36 -22 -45 -16 -32 -30 -142 -24 -183 4 -22 17 -81 30 -131 12 -49 25 -101 28 -115 3 -14 13 -52 22 -85 17 -63 29 -109 44 -172 5 -21 32 -128 61 -238 29 -110 56 -218 62 -240 44 -188 62 -237 110 -288 80 -84 211 -116 333 -82 89 25 106 29 245 70 30 9 69 20 85 25 17 4 68 20 115 35 90 29 134 41 190 55 19 5 76 20 125 34 50 13 124 34 165 45 41 11 102 27 135 36 71 19 349 90 385 98 14 3 70 17 125 32 55 15 120 31 145 37 25 5 61 14 80 18 61 14 174 40 215 50 22 4 72 16 110 25 39 9 90 20 115 26 25 5 63 14 85 20 22 5 63 13 90 19 28 5 104 21 170 35 66 14 140 29 165 34 25 5 79 16 120 26 41 9 102 21 135 27 93 15 143 25 235 43 47 9 105 21 130 25 25 4 72 13 105 19 104 20 257 47 403 70 31 5 98 17 147 26 50 9 118 21 153 26 142 21 189 28 217 33 17 3 77 13 135 21 141 21 198 34 238 52 45 20 108 84 128 130 21 50 22 183 1 243 -9 25 -39 110 -67 190 -29 80 -54 155 -57 168 -3 12 -9 25 -14 28 -5 3 -9 14 -9 25 0 10 -4 27 -9 37 -6 9 -21 50 -35 90 -58 162 -78 218 -86 237 -5 11 -21 56 -36 100 -74 218 -156 320 -289 356 -19 6 -35 14 -35 19 0 15 -151 10 -180 -6z"/>
+                      <path d="M7220 5589 c-25 -4 -85 -13 -135 -20 -49 -6 -133 -17 -185 -25 -52 -8 -125 -19 -162 -24 -38 -6 -98 -14 -135 -20 -120 -17 -267 -40 -318 -50 -27 -5 -84 -14 -125 -20 -41 -7 -111 -18 -155 -26 -44 -8 -107 -19 -140 -25 -33 -6 -80 -15 -105 -20 -25 -4 -83 -15 -130 -24 -47 -8 -121 -22 -165 -31 -44 -9 -91 -19 -105 -21 -44 -8 -174 -34 -215 -43 -22 -4 -67 -14 -100 -20 -61 -12 -158 -33 -230 -50 -22 -5 -62 -14 -90 -19 -27 -6 -90 -20 -140 -32 -116 -28 -161 -38 -210 -49 -22 -4 -69 -16 -105 -25 -36 -10 -83 -21 -105 -25 -22 -4 -85 -20 -140 -35 -105 -28 -415 -110 -475 -125 -19 -5 -51 -13 -70 -19 -19 -5 -78 -22 -130 -36 -102 -29 -125 -35 -210 -60 -30 -9 -68 -20 -85 -25 -16 -4 -68 -20 -115 -35 -47 -15 -98 -30 -115 -35 -16 -4 -82 -25 -145 -45 -63 -20 -128 -41 -145 -45 -56 -15 -370 -120 -387 -130 -10 -6 -25 -10 -33 -10 -8 0 -23 -4 -33 -10 -9 -5 -57 -23 -107 -39 -119 -39 -265 -90 -290 -101 -11 -5 -54 -20 -95 -35 -96 -34 -306 -113 -345 -129 -16 -7 -46 -19 -65 -26 -44 -15 -66 -24 -112 -44 -20 -9 -39 -16 -42 -16 -3 0 -25 -9 -49 -19 -23 -11 -100 -43 -172 -71 -126 -51 -161 -66 -273 -116 -29 -13 -55 -24 -57 -24 -3 0 -27 -10 -53 -21 -26 -12 -63 -28 -82 -36 -118 -51 -159 -76 -206 -125 -49 -52 -97 -136 -108 -190 -4 -16 -11 -28 -16 -28 -17 0 -12 -162 5 -184 8 -11 15 -32 15 -48 0 -15 4 -47 10 -70 5 -24 17 -81 25 -128 9 -47 20 -105 25 -130 5 -25 14 -70 19 -100 6 -30 18 -91 26 -135 9 -44 20 -102 25 -130 5 -27 14 -75 19 -105 6 -30 23 -116 37 -190 14 -74 29 -143 35 -152 5 -10 9 -24 9 -32 0 -8 20 -37 45 -64 33 -36 62 -57 101 -71 85 -32 150 -25 270 29 27 13 77 36 112 51 34 16 64 29 67 29 2 0 48 21 102 46 54 25 130 59 170 75 39 15 92 37 117 49 86 38 131 57 261 110 72 29 139 56 150 60 11 4 38 15 60 25 22 9 49 20 60 24 11 5 31 13 45 19 14 5 57 22 95 37 39 15 79 31 90 35 11 5 65 25 120 45 99 36 211 79 250 95 11 5 40 16 65 24 25 8 97 33 160 57 63 23 277 96 475 161 198 66 369 124 380 128 11 4 61 20 110 35 50 15 98 31 107 36 10 5 24 9 32 9 7 0 49 11 92 25 44 14 97 30 119 36 22 7 58 17 80 24 111 34 367 107 480 137 22 6 51 14 65 18 37 12 128 37 185 50 28 7 79 21 115 32 36 10 83 23 105 28 46 9 330 80 450 112 44 12 98 25 120 29 22 4 58 12 80 17 57 14 182 42 235 54 25 6 61 14 80 18 19 5 91 21 160 35 69 15 141 31 160 35 65 14 295 62 320 67 30 5 84 15 255 48 130 26 150 30 320 60 50 9 108 20 130 25 22 5 74 14 115 20 41 6 113 18 160 26 47 8 114 20 150 25 171 29 226 52 268 113 46 69 66 185 43 260 -109 354 -331 1017 -359 1069 -87 161 -230 229 -412 196z"/>
+                      <path d="M7225 2996 c-27 -7 -77 -19 -110 -26 -55 -11 -226 -49 -320 -70 -22 -5 -92 -21 -155 -35 -63 -15 -125 -31 -138 -36 -13 -5 -33 -9 -44 -9 -12 0 -35 -4 -52 -10 -32 -10 -223 -55 -266 -63 -14 -3 -70 -17 -125 -32 -115 -30 -154 -40 -210 -53 -38 -9 -86 -21 -165 -42 -19 -5 -57 -14 -85 -21 -27 -6 -88 -22 -135 -36 -89 -25 -113 -31 -220 -58 -36 -9 -78 -20 -95 -25 -16 -5 -48 -13 -70 -19 -22 -6 -96 -27 -165 -46 -69 -20 -143 -40 -165 -46 -22 -7 -60 -17 -85 -24 -25 -7 -65 -18 -90 -25 -25 -7 -56 -16 -70 -20 -14 -5 -63 -19 -110 -33 -115 -34 -227 -67 -275 -82 -22 -7 -60 -18 -85 -25 -44 -13 -75 -22 -300 -93 -63 -20 -153 -48 -200 -63 -271 -84 -721 -239 -759 -261 -98 -57 -161 -139 -190 -248 -21 -79 -19 -90 84 -470 24 -87 31 -113 50 -180 9 -33 25 -91 35 -130 28 -107 49 -184 66 -245 8 -30 19 -71 24 -90 40 -156 65 -213 112 -265 70 -77 140 -108 253 -113 106 -4 74 -14 690 204 55 20 109 38 120 41 11 2 29 9 40 13 11 5 70 25 130 45 61 20 153 51 205 70 52 18 183 61 290 95 107 34 204 65 215 70 11 4 74 25 140 45 66 21 152 48 190 60 39 13 104 33 145 45 41 13 107 33 145 45 68 22 161 50 315 95 41 13 95 29 120 37 25 8 68 21 95 28 28 7 97 27 155 44 58 17 121 35 140 40 19 5 76 21 125 36 50 14 106 30 125 35 19 5 76 21 125 35 97 27 148 41 180 49 20 4 110 28 230 61 33 10 76 21 95 25 67 15 240 59 335 85 96 26 124 33 224 57 106 25 157 56 194 115 44 72 60 177 37 247 -5 17 -22 72 -36 121 -15 50 -42 137 -61 195 -18 58 -37 119 -42 135 -5 17 -25 82 -45 145 -20 63 -48 153 -63 200 -78 254 -89 281 -142 348 -49 61 -108 103 -180 125 -62 20 -107 21 -176 3z"/>
+                    </g>
+                  </svg>
+                } @else if (cuenta.icon === 'CUSTOM_NUBANK') {
+                  <img src="https://cdn.simpleicons.org/nubank/white" class="w-full h-full object-contain" alt="Nu">
+                } @else if (cuenta.icon === 'CUSTOM_BBVA') {
+                  <img src="https://cdn.simpleicons.org/bbva/white" class="w-full h-full object-contain" alt="BBVA">
+                } @else if (cuenta.icon === 'CUSTOM_SANTANDER') {
+                  <img src="https://cdn.simpleicons.org/santander/white" class="w-full h-full object-contain" alt="Santander">
+                } @else {
+                  <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M19 7H5c-1.103 0-2 .897-2 2v10c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2V9c0-1.103-.897-2-2-2zm-7 10H5v-2h7v2zm7-4H5V9h14v4zM5 5h14V3H5c-1.103 0-2 .897-2 2v1h2V5z"/></svg>
+                }
+              </div>
+            </div>
+
+            <svg class="w-10 h-8 opacity-90 group-hover:rotate-12 transition-transform" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="2" y="5" width="20" height="14" rx="3" fill="currentColor" fill-opacity="0.2"/>
+              <rect x="6" y="8" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1"/>
+              <path d="M7 9H11V12H7V9Z" fill="currentColor"/><path d="M13 9H17V12H13V9Z" fill="currentColor"/>
+              <path d="M7 13H11V16H7V13Z" fill="currentColor"/><path d="M13 13H17V16H13V13Z" fill="currentColor"/>
+            </svg>
           </div>
           
           <div>
-            <p class="text-xs opacity-70 mb-1">Saldo Disponible</p>
+            <p class="text-xs opacity-70 mb-1 font-medium">Saldo Disponible</p>
             <p class="text-2xl font-black tracking-tight">
               {{ cuenta.saldo | currency:'COP':'symbol-narrow':'1.0-0' }}
             </p>
           </div>
 
           <div class="flex justify-between items-end">
-            <span class="text-sm font-mono opacity-80">{{ cuenta.numero }}</span>
-            <i class='bx bxl-visa text-4xl opacity-50'></i>
+            <span class="text-sm font-mono opacity-80 tracking-tighter">{{ cuenta.numero }}</span>
+            
+            <div class="h-8 w-12 flex items-center justify-end">
+              @if (cuenta.red === 'CUSTOM_VISA') {
+                <img src="https://cdn.simpleicons.org/visa/white" class="h-full object-contain opacity-70">
+              } @else if (cuenta.red === 'CUSTOM_MASTERCARD') {
+                <img src="https://cdn.simpleicons.org/mastercard/white" class="h-full object-contain opacity-70">
+              } @else if (cuenta.red === 'CUSTOM_AMEX') {
+                <img src="https://cdn.simpleicons.org/americanexpress/white" class="h-full object-contain opacity-70">
+              } @else {
+                <svg class="w-8 h-8 opacity-40" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zM4 6h16v2H4V6zm0 12v-6h16v6H4z"/><rect x="6" y="14" width="5" height="2" rx="1"/></svg>
+              }
+            </div>
           </div>
         </div>
       </div>
@@ -29,7 +68,7 @@
 
     <div (click)="abrirModal()" 
          class="h-48 rounded-3xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 hover:border-finq-primary hover:text-finq-primary hover:bg-indigo-50/30 transition-all cursor-pointer group">
-      <i class='bx bx-plus-circle text-4xl mb-2 group-hover:animate-bounce'></i>
+      <svg class="w-10 h-10 mb-2 group-hover:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       <span class="font-bold text-sm">Vincular cuenta</span>
     </div>
   </div>
@@ -41,32 +80,73 @@
       
       <div class="p-6 border-b border-gray-50 flex justify-between items-center">
         <h3 class="text-xl font-bold text-gray-900">Nueva Cuenta</h3>
-        <button (click)="cerrarModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-          <i class='bx bx-x text-2xl'></i>
+        <button (click)="cerrarModal()" class="text-gray-400 hover:text-gray-600">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
 
       <div class="p-6 space-y-6">
-        <div class="h-32 rounded-2xl bg-gradient-to-br {{ nuevaCuenta.color }} p-4 text-white shadow-lg transition-all duration-500 relative overflow-hidden">
+        <div class="h-40 rounded-2xl bg-gradient-to-br {{ nuevaCuenta.color }} p-5 text-white shadow-lg relative overflow-hidden">
           <div class="absolute -right-4 -top-4 w-16 h-16 bg-white/10 rounded-full blur-xl"></div>
-          <p class="text-[10px] font-bold uppercase opacity-70">{{ nuevaCuenta.nombre || 'Nombre de la cuenta' }}</p>
-          <p class="text-lg font-black mt-2">{{ nuevaCuenta.saldo | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
-          <p class="text-[10px] font-mono mt-4 opacity-50">{{ nuevaCuenta.numero || '**** 0000' }}</p>
+          
+          <div class="flex justify-between items-start relative z-10">
+            <div class="w-8 h-8 bg-white/20 backdrop-blur-md rounded-lg flex items-center justify-center p-1.5 border border-white/30">
+              @let bancoIcon = obtenerIconoBanco(nuevaCuenta.nombre);
+              @if (bancoIcon === 'CUSTOM_BANCOLOMBIA') {
+                <svg class="w-full h-full object-contain brightness-0 invert" viewBox="0 0 800 802" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
+                  <g transform="translate(0.000000,802.000000) scale(0.100000,-0.100000)" fill="currentColor" stroke="none">
+                    <path d="M5920 8004 c-14 -7 -45 -14 -69 -14 -24 0 -71 -4 -105 -10 -56 -9 -171 -25 -371 -51 -44 -6 -102 -14 -130 -19 -27 -5 -99 -16 -160 -25 -200 -29 -365 -54 -425 -65 -25 -5 -90 -16 -145 -25 -145 -23 -421 -72 -535 -95 -25 -5 -85 -16 -135 -25 -49 -9 -124 -23 -165 -32 -41 -9 -93 -19 -115 -23 -22 -4 -74 -15 -115 -24 -41 -8 -109 -22 -150 -31 -150 -30 -376 -81 -426 -96 -17 -5 -40 -9 -52 -9 -11 0 -31 -4 -44 -9 -13 -5 -59 -17 -103 -27 -44 -9 -132 -30 -195 -47 -63 -16 -133 -33 -155 -38 -164 -39 -288 -71 -440 -114 -49 -14 -106 -30 -125 -35 -136 -37 -228 -63 -248 -71 -13 -5 -32 -9 -43 -9 -11 0 -48 -13 -83 -29 -66 -31 -158 -119 -185 -177 -7 -16 -17 -36 -22 -45 -16 -32 -30 -142 -24 -183 4 -22 17 -81 30 -131 12 -49 25 -101 28 -115 3 -14 13 -52 22 -85 17 -63 29 -109 44 -172 5 -21 32 -128 61 -238 29 -110 56 -218 62 -240 44 -188 62 -237 110 -288 80 -84 211 -116 333 -82 89 25 106 29 245 70 30 9 69 20 85 25 17 4 68 20 115 35 90 29 134 41 190 55 19 5 76 20 125 34 50 13 124 34 165 45 41 11 102 27 135 36 71 19 349 90 385 98 14 3 70 17 125 32 55 15 120 31 145 37 25 5 61 14 80 18 61 14 174 40 215 50 22 4 72 16 110 25 39 9 90 20 115 26 25 5 63 14 85 20 22 5 63 13 90 19 28 5 104 21 170 35 66 14 140 29 165 34 25 5 79 16 120 26 41 9 102 21 135 27 93 15 143 25 235 43 47 9 105 21 130 25 25 4 72 13 105 19 104 20 257 47 403 70 31 5 98 17 147 26 50 9 118 21 153 26 142 21 189 28 217 33 17 3 77 13 135 21 141 21 198 34 238 52 45 20 108 84 128 130 21 50 22 183 1 243 -9 25 -39 110 -67 190 -29 80 -54 155 -57 168 -3 12 -9 25 -14 28 -5 3 -9 14 -9 25 0 10 -4 27 -9 37 -6 9 -21 50 -35 90 -58 162 -78 218 -86 237 -5 11 -21 56 -36 100 -74 218 -156 320 -289 356 -19 6 -35 14 -35 19 0 15 -151 10 -180 -6z"/>
+                    <path d="M7220 5589 c-25 -4 -85 -13 -135 -20 -49 -6 -133 -17 -185 -25 -52 -8 -125 -19 -162 -24 -38 -6 -98 -14 -135 -20 -120 -17 -267 -40 -318 -50 -27 -5 -84 -14 -125 -20 -41 -7 -111 -18 -155 -26 -44 -8 -107 -19 -140 -25 -33 -6 -80 -15 -105 -20 -25 -4 -83 -15 -130 -24 -47 -8 -121 -22 -165 -31 -44 -9 -91 -19 -105 -21 -44 -8 -174 -34 -215 -43 -22 -4 -67 -14 -100 -20 -61 -12 -158 -33 -230 -50 -22 -5 -62 -14 -90 -19 -27 -6 -90 -20 -140 -32 -116 -28 -161 -38 -210 -49 -22 -4 -69 -16 -105 -25 -36 -10 -83 -21 -105 -25 -22 -4 -85 -20 -140 -35 -105 -28 -415 -110 -475 -125 -19 -5 -51 -13 -70 -19 -19 -5 -78 -22 -130 -36 -102 -29 -125 -35 -210 -60 -30 -9 -68 -20 -85 -25 -16 -4 -68 -20 -115 -35 -47 -15 -98 -30 -115 -35 -16 -4 -82 -25 -145 -45 -63 -20 -128 -41 -145 -45 -56 -15 -370 -120 -387 -130 -10 -6 -25 -10 -33 -10 -8 0 -23 -4 -33 -10 -9 -5 -57 -23 -107 -39 -119 -39 -265 -90 -290 -101 -11 -5 -54 -20 -95 -35 -96 -34 -306 -113 -345 -129 -16 -7 -46 -19 -65 -26 -44 -15 -66 -24 -112 -44 -20 -9 -39 -16 -42 -16 -3 0 -25 -9 -49 -19 -23 -11 -100 -43 -172 -71 -126 -51 -161 -66 -273 -116 -29 -13 -55 -24 -57 -24 -3 0 -27 -10 -53 -21 -26 -12 -63 -28 -82 -36 -118 -51 -159 -76 -206 -125 -49 -52 -97 -136 -108 -190 -4 -16 -11 -28 -16 -28 -17 0 -12 -162 5 -184 8 -11 15 -32 15 -48 0 -15 4 -47 10 -70 5 -24 17 -81 25 -128 9 -47 20 -105 25 -130 5 -25 14 -70 19 -100 6 -30 18 -91 26 -135 9 -44 20 -102 25 -130 5 -27 14 -75 19 -105 6 -30 23 -116 37 -190 14 -74 29 -143 35 -152 5 -10 9 -24 9 -32 0 -8 20 -37 45 -64 33 -36 62 -57 101 -71 85 -32 150 -25 270 29 27 13 77 36 112 51 34 16 64 29 67 29 2 0 48 21 102 46 54 25 130 59 170 75 39 15 92 37 117 49 86 38 131 57 261 110 72 29 139 56 150 60 11 4 38 15 60 25 22 9 49 20 60 24 11 5 31 13 45 19 14 5 57 22 95 37 39 15 79 31 90 35 11 5 65 25 120 45 99 36 211 79 250 95 11 5 40 16 65 24 25 8 97 33 160 57 63 23 277 96 475 161 198 66 369 124 380 128 11 4 61 20 110 35 50 15 98 31 107 36 10 5 24 9 32 9 7 0 49 11 92 25 44 14 97 30 119 36 22 7 58 17 80 24 111 34 367 107 480 137 22 6 51 14 65 18 37 12 128 37 185 50 28 7 79 21 115 32 36 10 83 23 105 28 46 9 330 80 450 112 44 12 98 25 120 29 22 4 58 12 80 17 57 14 182 42 235 54 25 6 61 14 80 18 19 5 91 21 160 35 69 15 141 31 160 35 65 14 295 62 320 67 30 5 84 15 255 48 130 26 150 30 320 60 50 9 108 20 130 25 22 5 74 14 115 20 41 6 113 18 160 26 47 8 114 20 150 25 171 29 226 52 268 113 46 69 66 185 43 260 -109 354 -331 1017 -359 1069 -87 161 -230 229 -412 196z"/>
+                    <path d="M7225 2996 c-27 -7 -77 -19 -110 -26 -55 -11 -226 -49 -320 -70 -22 -5 -92 -21 -155 -35 -63 -15 -125 -31 -138 -36 -13 -5 -33 -9 -44 -9 -12 0 -35 -4 -52 -10 -32 -10 -223 -55 -266 -63 -14 -3 -70 -17 -125 -32 -115 -30 -154 -40 -210 -53 -38 -9 -86 -21 -165 -42 -19 -5 -57 -14 -85 -21 -27 -6 -88 -22 -135 -36 -89 -25 -113 -31 -220 -58 -36 -9 -78 -20 -95 -25 -16 -5 -48 -13 -70 -19 -22 -6 -96 -27 -165 -46 -69 -20 -143 -40 -165 -46 -22 -7 -60 -17 -85 -24 -25 -7 -65 -18 -90 -25 -25 -7 -56 -16 -70 -20 -14 -5 -63 -19 -110 -33 -115 -34 -227 -67 -275 -82 -22 -7 -60 -18 -85 -25 -44 -13 -75 -22 -300 -93 -63 -20 -153 -48 -200 -63 -271 -84 -721 -239 -759 -261 -98 -57 -161 -139 -190 -248 -21 -79 -19 -90 84 -470 24 -87 31 -113 50 -180 9 -33 25 -91 35 -130 28 -107 49 -184 66 -245 8 -30 19 -71 24 -90 40 -156 65 -213 112 -265 70 -77 140 -108 253 -113 106 -4 74 -14 690 204 55 20 109 38 120 41 11 2 29 9 40 13 11 5 70 25 130 45 61 20 153 51 205 70 52 18 183 61 290 95 107 34 204 65 215 70 11 4 74 25 140 45 66 21 152 48 190 60 39 13 104 33 145 45 41 13 107 33 145 45 68 22 161 50 315 95 41 13 95 29 120 37 25 8 68 21 95 28 28 7 97 27 155 44 58 17 121 35 140 40 19 5 76 21 125 36 50 14 106 30 125 35 19 5 76 21 125 35 97 27 148 41 180 49 20 4 110 28 230 61 33 10 76 21 95 25 67 15 240 59 335 85 96 26 124 33 224 57 106 25 157 56 194 115 44 72 60 177 37 247 -5 17 -22 72 -36 121 -15 50 -42 137 -61 195 -18 58 -37 119 -42 135 -5 17 -25 82 -45 145 -20 63 -48 153 -63 200 -78 254 -89 281 -142 348 -49 61 -108 103 -180 125 -62 20 -107 21 -176 3z"/>
+                    </g>
+                  </svg>
+              } @else if (bancoIcon === 'CUSTOM_NUBANK') {
+                <img src="https://cdn.simpleicons.org/nubank/white" class="w-full h-full object-contain">
+              } @else if (bancoIcon === 'CUSTOM_BBVA') {
+                <img src="https://cdn.simpleicons.org/bbva/white" class="w-full h-full object-contain">
+              } @else {
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M2 20h20v2H2zM12 2 2 7v3h2v10h16V10h2V7L12 2z"/></svg>
+              }
+            </div>
+            <svg class="w-8 h-6 opacity-80" viewBox="0 0 24 24" fill="none"><rect x="2" y="5" width="20" height="14" rx="3" fill="currentColor" fill-opacity="0.2"/><rect x="6" y="8" width="12" height="9" rx="1.5" stroke="currentColor" stroke-width="1"/></svg>
+          </div>
+
+          <div class="mt-4">
+            <p class="text-[10px] font-bold uppercase opacity-70 tracking-widest">{{ nuevaCuenta.nombre || 'Nombre del Banco' }}</p>
+            <p class="text-xl font-black mt-1">{{ nuevaCuenta.saldo | currency:'COP':'symbol-narrow':'1.0-0' }}</p>
+          </div>
+          
+          <div class="flex justify-between items-end mt-2">
+            <p class="text-[10px] font-mono opacity-50">{{ nuevaCuenta.numero || '**** 0000' }}</p>
+            @let redIcon = obtenerIconoRed(nuevaCuenta.nombre);
+            <div class="h-6 w-10 flex justify-end">
+              @if (redIcon === 'CUSTOM_VISA') {
+                <img src="https://cdn.simpleicons.org/visa/white" class="h-full object-contain opacity-50">
+              } @else if (redIcon === 'CUSTOM_MASTERCARD') {
+                <img src="https://cdn.simpleicons.org/mastercard/white" class="h-full object-contain opacity-50">
+              } @else if (redIcon === 'CUSTOM_AMEX') {
+                <img src="https://cdn.simpleicons.org/americanexpress/white" class="h-full object-contain opacity-50">
+              } @else {
+                <svg class="w-6 h-6 opacity-30" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2z"/></svg>
+              }
+            </div>
+          </div>
         </div>
 
         <form (ngSubmit)="vincularNuevaCuenta()" class="space-y-4">
-          
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1 tracking-widest">Banco o Nombre</label>
-            <input type="text" name="nombre" [(ngModel)]="nuevaCuenta.nombre" placeholder="Ej: Bancolombia, Nequi..." required
-                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-finq-primary outline-none transition-all text-sm">
+            <input type="text" name="nombre" [(ngModel)]="nuevaCuenta.nombre" placeholder="Ej: Bancolombia, Nu, Visa..." required
+                   class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-finq-primary outline-none transition-all text-sm font-medium">
           </div>
 
           <div>
             <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1 ml-1 tracking-widest">Número de Cuenta o Alias</label>
-            <div class="relative">
-              <i class='bx bx-hash absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'></i>
-              <input type="text" name="numero" [(ngModel)]="nuevaCuenta.numero" placeholder="Ej: **** 1234 o Celular"
+            <div class="relative flex items-center">
+              <div class="absolute left-4 text-gray-400">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M16 8h-2V6h2v2zm0 4h-2v-2h2v2zm-4-4h-2V6h2v2zm0 4h-2v-2h2v2zm-4-4H6V6h2v2zm0 4H6v-2h2v2zM5 20h14v-2H5v2zm0-4h14v-2H5v2z"/></svg>
+              </div>
+              <input type="text" name="numero" [(ngModel)]="nuevaCuenta.numero" placeholder="Ej: **** 1234"
                      class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-finq-primary outline-none transition-all text-sm">
             </div>
           </div>
@@ -84,14 +164,14 @@
                 <button type="button" 
                         (click)="nuevaCuenta.color = color.value"
                         [class.ring-2]="nuevaCuenta.color === color.value"
-                        class="w-8 h-8 rounded-full bg-gradient-to-br {{ color.value }} ring-offset-2 ring-finq-primary transition-all active:scale-90">
+                        class="w-8 h-8 rounded-full bg-gradient-to-br {{ color.value }} ring-offset-2 ring-finq-primary transition-all active:scale-90 shadow-sm">
                 </button>
               }
             </div>
           </div>
 
           <button type="submit" 
-                  class="w-full py-4 bg-finq-primary text-white rounded-2xl font-black text-sm shadow-xl shadow-indigo-100 hover:brightness-110 active:scale-[0.98] transition-all">
+                  class="w-full py-4 bg-finq-primary text-white rounded-2xl font-black text-sm shadow-xl hover:brightness-110 active:scale-[0.98] transition-all">
             Vincular Ahora
           </button>
         </form>
