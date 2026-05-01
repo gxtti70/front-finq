@@ -18,6 +18,7 @@ Chart.register(...registerables);
 export class Dashboard implements OnInit {
   private transaccionService = inject(TransaccionService);
   private currencyPipe = inject(CurrencyPipe);
+  nombreUsuario: string = 'Santiago';
 
   // --- REFERENCIAS A LA UI ---
   @ViewChild('finqChart') chartCanvas!: ElementRef;
@@ -161,7 +162,7 @@ export class Dashboard implements OnInit {
     });
   }
 
-  guardarTransaccion() {
+ guardarTransaccion() {
     console.log('Intentando guardar:', this.nuevaTransaccion);
 
     const esIngreso = this.nuevaTransaccion.tipo === 'INGRESO';
@@ -186,8 +187,8 @@ export class Dashboard implements OnInit {
         this.cargarDatos(); 
         this.limpiarFormulario();
         
-        // --- NOTIFICACIÓN TROCADA (Ingreso -> Gasto / Gasto -> Ingreso) ---
-        this.mostrarAviso(`${esIngreso ? 'Gasto' : 'Ingreso'} de ${montoMsg} registrado`, true);
+        // 🟢 CORREGIDO: Ahora sí dice la verdad (Si es ingreso -> Ingreso, si no -> Gasto)
+        this.mostrarAviso(`${esIngreso ? 'Ingreso' : 'Gasto'} de ${montoMsg} registrado`, true);
       },
       error: (err) => {
         console.error('Error al guardar:', err);

@@ -1,57 +1,62 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+// 🟢 Rutas de importación
+import { CuentaService } from '../../services/cuenta.service';
+import { Cuenta } from '../../models/cuenta';
 
 @Component({
   selector: 'app-billetera',
   standalone: true,
-  // 1. Quitamos NgIconComponent de los imports
   imports: [CurrencyPipe, FormsModule], 
   templateUrl: './billetera.html',
-  // 2. Eliminamos el bloque de providers e iconos de npm
   providers: [] 
 })
-export class Billetera {
+export class Billetera implements OnInit {
+  
+  private cuentaService = inject(CuentaService);
+
+  // Estados de la UI
   mostrarModal = signal(false);
+  cuentaSeleccionada = signal<Cuenta | null>(null); // 🟢 Para ver detalles
+  cuentas = signal<Cuenta[]>([]);
 
-  // Lista de cuentas (Usando identificadores para el HTML)
-  cuentas = signal([
-    { 
-      nombre: 'Bancolombia', 
-      saldo: 2500000, 
-      color: 'from-yellow-400 to-yellow-600', 
-      numero: '**** 4521', 
-      icon: 'CUSTOM_BANCOLOMBIA', 
-      red: 'CUSTOM_VISA' 
-    },
-    { 
-      nombre: 'Nu México', 
-      saldo: 1200000, 
-      color: 'from-purple-600 to-indigo-800', 
-      numero: '**** 9901', 
-      icon: 'CUSTOM_NUBANK', 
-      red: 'CUSTOM_MASTERCARD' 
-    },
-    { 
-      nombre: 'Efectivo', 
-      saldo: 450000, 
-      color: 'from-emerald-500 to-teal-700', 
-      numero: 'Bolsillo', 
-      icon: 'CUSTOM_WALLET', // Flag para SVG de billetera
-      red: '' 
-    }
-  ]);
-
-  nuevaCuenta = { nombre: '', saldo: 0, color: 'from-finq-primary to-indigo-700', numero: '' };
+  nuevaCuenta: Partial<Cuenta> = { 
+    nombre: '', 
+    saldo: 0, 
+    color: 'from-blue-600 to-indigo-800', 
+    numero: '' 
+  };
 
   coloresDisponibles = [
-    { name: 'Azul FinQ', value: 'from-finq-primary to-indigo-700' },
+    { name: 'Azul FinQ', value: 'from-blue-600 to-indigo-800' },
     { name: 'Esmeralda', value: 'from-emerald-500 to-teal-700' },
     { name: 'Naranja Vivo', value: 'from-orange-400 to-red-600' },
     { name: 'Púrpura Nu', value: 'from-purple-600 to-indigo-900' },
     { name: 'Dark Mode', value: 'from-slate-700 to-slate-900' }
   ];
 
+  ngOnInit() {
+    this.cargarCuentas();
+  }
+
+  cargarCuentas() {
+    this.cuentaService.getCuentas().subscribe({
+      next: (cuentasBackend) => {
+        const cuentasAdaptadas = cuentasBackend.map(c => ({
+          ...c,
+          color: c.colorHex ? `from-[${c.colorHex}] to-gray-800` : 'from-blue-600 to-indigo-800',
+          numero: '**** ' + Math.floor(1000 + Math.random() * 9000), 
+          icon: this.obtenerIconoBanco(c.nombre),
+          red: this.obtenerIconoRed(c.nombre)
+        }));
+        this.cuentas.set(cuentasAdaptadas);
+      },
+      error: (err) => console.error('Error cargando cuentas:', err)
+    });
+  }
+
+  // --- MÉTODOS DEL MODAL NUEVA CUENTA ---
   abrirModal() {
     this.mostrarModal.set(true);
   }
@@ -61,8 +66,41 @@ export class Billetera {
     this.limpiarFormulario();
   }
 
-  // DETECCIÓN DE BANCOS POR STRING (Retorna el ID para el HTML)
-  obtenerIconoBanco(nombre: string): string {
+  vincularNuevaCuenta() {
+    if (this.nuevaCuenta.nombre) {
+      const cuentaAEnviar: any = {
+        nombre: this.nuevaCuenta.nombre,
+        tipo: 'DEBITO',
+        saldo: this.nuevaCuenta.saldo,
+        colorHex: this.nuevaCuenta.color === 'from-blue-600 to-indigo-800' ? '#2563eb' : '#000000' 
+      };
+
+      this.cuentaService.crearCuenta(cuentaAEnviar).subscribe({
+        next: (res) => {
+          this.cargarCuentas();
+          this.cerrarModal();
+        },
+        error: (err) => console.error('Error al crear cuenta:', err)
+      });
+    }
+  }
+
+  limpiarFormulario() {
+    this.nuevaCuenta = { nombre: '', saldo: 0, color: 'from-blue-600 to-indigo-800', numero: '' };
+  }
+
+  // --- 🟢 MÉTODOS DE DETALLES (Lo que se había confundido) ---
+  abrirDetalle(cuenta: Cuenta) {
+    this.cuentaSeleccionada.set(cuenta);
+  }
+
+  cerrarDetalle() {
+    this.cuentaSeleccionada.set(null);
+  }
+
+  // --- HELPERS DE ICONOS ---
+  obtenerIconoBanco(nombre: string | undefined): string {
+    if (!nombre) return 'CUSTOM_BANK_GENERIC';
     const n = nombre.toLowerCase();
     if (n.includes('bancolombia')) return 'CUSTOM_BANCOLOMBIA';
     if (n.includes('nu')) return 'CUSTOM_NUBANK';
@@ -72,30 +110,12 @@ export class Billetera {
     return 'CUSTOM_BANK_GENERIC';
   }
 
-  // DETECCIÓN DE REDES POR STRING (Retorna el ID para el HTML)
-  obtenerIconoRed(nombre: string): string {
+  obtenerIconoRed(nombre: string | undefined): string {
+    if (!nombre) return '';
     const n = nombre.toLowerCase();
     if (n.includes('visa')) return 'CUSTOM_VISA';
     if (n.includes('master')) return 'CUSTOM_MASTERCARD';
     if (n.includes('amex') || n.includes('american')) return 'CUSTOM_AMEX';
     return ''; 
-  }
-
-  vincularNuevaCuenta() {
-    if (this.nuevaCuenta.nombre) {
-      const idCuenta = this.nuevaCuenta.numero || `**** ${Math.floor(1000 + Math.random() * 9000)}`;
-      const cuentaFinal = {
-        ...this.nuevaCuenta,
-        numero: idCuenta,
-        icon: this.obtenerIconoBanco(this.nuevaCuenta.nombre),
-        red: this.obtenerIconoRed(this.nuevaCuenta.nombre)
-      };
-      this.cuentas.update(prev => [...prev, cuentaFinal]);
-      this.cerrarModal();
-    }
-  }
-
-  limpiarFormulario() {
-    this.nuevaCuenta = { nombre: '', saldo: 0, color: 'from-finq-primary to-indigo-700', numero: '' };
   }
 }

@@ -2,7 +2,7 @@
   
   <div class="flex items-center justify-between">
     <div>
-      <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Hola, Santiago</h2>
+      <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Hola, {{ nombreUsuario || 'Santiago' }}</h2>
       <p class="text-sm text-gray-500 mt-1">Aquí está el resumen de tus finanzas hoy</p>
     </div>
     <button (click)="abrirModal()" class="bg-finq-primary hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-lg shadow-indigo-100">
@@ -22,18 +22,6 @@
       <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-finq-primary opacity-20 rounded-full blur-3xl"></div>
     </div>
 
-    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm group hover:border-rose-100 transition-all">
-      <div class="flex items-center justify-between">
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Gastos del mes</p>
-        <div class="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-          <i class='bx bx-trending-down text-rose-500 text-xl'></i>
-        </div>
-      </div>
-      <p class="text-2xl font-bold text-gray-900 mt-4">
-        {{ gastos() | currency:'COP':'symbol-narrow':'1.0-0' }}
-      </p>
-    </div>
-
     <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm group hover:border-emerald-100 transition-all">
       <div class="flex items-center justify-between">
         <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Ingresos del mes</p>
@@ -43,6 +31,18 @@
       </div>
       <p class="text-2xl font-bold text-gray-900 mt-4">
         {{ ingresos() | currency:'COP':'symbol-narrow':'1.0-0' }}
+      </p>
+    </div>
+
+    <div class="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm group hover:border-rose-100 transition-all">
+      <div class="flex items-center justify-between">
+        <p class="text-xs font-bold uppercase tracking-widest text-gray-400">Gastos del mes</p>
+        <div class="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center group-hover:scale-110 transition-transform">
+          <i class='bx bx-trending-down text-rose-500 text-xl'></i>
+        </div>
+      </div>
+      <p class="text-2xl font-bold text-gray-900 mt-4">
+        {{ gastos() | currency:'COP':'symbol-narrow':'1.0-0' }}
       </p>
     </div>
   </div>
@@ -123,18 +123,21 @@
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 text-center">Tipo de operación</label>
             <div class="flex p-1.5 bg-gray-100 rounded-2xl">
+               
               <label class="flex-1 text-center cursor-pointer">
-                <input type="radio" name="tipo" [(ngModel)]="nuevaTransaccion.tipo" value="GASTO" class="peer sr-only">
+                <input type="radio" name="tipo" [(ngModel)]="nuevaTransaccion.tipo" value="INGRESO" class="peer sr-only">
                 <div class="py-2.5 rounded-xl text-xs font-black text-gray-500 peer-checked:bg-white peer-checked:text-emerald-600 peer-checked:shadow-sm transition-all flex items-center justify-center gap-2">
                   <i class='bx bx-plus-circle text-lg'></i> Ingreso
                 </div>
               </label>
+
               <label class="flex-1 text-center cursor-pointer">
-                <input type="radio" name="tipo" [(ngModel)]="nuevaTransaccion.tipo" value="INGRESO" class="peer sr-only">
+                <input type="radio" name="tipo" [(ngModel)]="nuevaTransaccion.tipo" value="GASTO" class="peer sr-only">
                 <div class="py-2.5 rounded-xl text-xs font-black text-gray-500 peer-checked:bg-white peer-checked:text-rose-600 peer-checked:shadow-sm transition-all flex items-center justify-center gap-2">
                   <i class='bx bx-minus-circle text-lg'></i> Gasto
                 </div>
               </label>
+              
             </div>
           </div>
           <div class="relative">
