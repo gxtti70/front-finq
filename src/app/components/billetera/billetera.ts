@@ -1,7 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-// 🟢 Rutas de importación
 import { CuentaService } from '../../services/cuenta.service';
 import { Cuenta } from '../../models/cuenta';
 
@@ -45,7 +44,7 @@ export class Billetera implements OnInit {
       next: (cuentasBackend) => {
         const cuentasAdaptadas = cuentasBackend.map(c => ({
           ...c,
-          color: c.colorHex ? `from-[${c.colorHex}] to-gray-800` : 'from-blue-600 to-indigo-800',
+          color: c.colorHex && c.colorHex.startsWith('from-') ? c.colorHex : 'from-blue-600 to-indigo-800',
           numero: '**** ' + Math.floor(1000 + Math.random() * 9000), 
           icon: this.obtenerIconoBanco(c.nombre),
           red: this.obtenerIconoRed(c.nombre)
@@ -72,7 +71,7 @@ export class Billetera implements OnInit {
         nombre: this.nuevaCuenta.nombre,
         tipo: 'DEBITO',
         saldo: this.nuevaCuenta.saldo,
-        colorHex: this.nuevaCuenta.color === 'from-blue-600 to-indigo-800' ? '#2563eb' : '#000000' 
+        colorHex: this.nuevaCuenta.color
       };
 
       this.cuentaService.crearCuenta(cuentaAEnviar).subscribe({

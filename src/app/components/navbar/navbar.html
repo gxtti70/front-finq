@@ -40,11 +40,11 @@
             <i class='bx bx-user text-gray-600 text-xl'></i>
           </button>
 
-          @if (isProfileMenuOpen()) {
+         @if (isProfileMenuOpen()) {
             <div class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50 animate-fade-in">
               <div class="px-4 py-3 border-b border-gray-50">
-                <p class="text-sm font-semibold text-gray-900">Santiago</p>
-                <p class="text-xs text-gray-500 truncate">santiago@finq.com</p>
+                <p class="text-sm font-semibold text-gray-900">{{ nombreUsuario }}</p>
+                <p class="text-xs text-gray-500 truncate" [title]="correoUsuario">{{ correoUsuario }}</p>
               </div>
               <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-finq-primary transition-colors flex items-center gap-2">
                 <i class='bx bx-cog'></i> Configuración
