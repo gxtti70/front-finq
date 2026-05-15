@@ -1,11 +1,13 @@
 import { Component, OnInit, inject, signal, ViewChild, ElementRef } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router'; 
+
 import { TransaccionService } from '../../services/transaccion';
+import { CuentaService } from '../../services/cuenta.service'; 
 import { Transaccion } from '../../models/transaccion';
 import { Chart, registerables } from 'chart.js';
 
-// Registramos los módulos de Chart.js
 Chart.register(...registerables);
 
 @Component({
@@ -13,28 +15,32 @@ Chart.register(...registerables);
   standalone: true,
   imports: [CurrencyPipe, FormsModule],
   templateUrl: './dashboard.html',
-  providers: [CurrencyPipe] // Lo inyectamos aquí para usarlo en el TS
+  providers: [CurrencyPipe] 
 })
 export class Dashboard implements OnInit {
   private transaccionService = inject(TransaccionService);
+  private cuentaService = inject(CuentaService); 
+  private router = inject(Router); 
   private currencyPipe = inject(CurrencyPipe);
-  nombreUsuario: string = 'Santiago';
+  
+  nombreUsuario: string = 'Usuario';
 
-  // --- REFERENCIAS A LA UI ---
   @ViewChild('finqChart') chartCanvas!: ElementRef;
   chart: any;
 
-  // --- ESTADOS DE LA UI (SIGNALS) ---
+  // --- ESTADOS DE LA UI ---
+  cargando = signal<boolean>(true); 
+  sinCuentas = signal<boolean>(false); 
+
+  saldoBaseCuentas = signal<number>(0); // 🟢 Aquí guardamos la suma de las tarjetas
+
   saldoTotal = signal<number>(0);
   ingresos = signal<number>(0);
   gastos = signal<number>(0);
   mostrarModal = signal(false);
 
-  // Signal para la notificación tipo Toast
   notificacion = signal<{ mostrar: boolean, mensaje: string, exito: boolean }>({
-    mostrar: false,
-    mensaje: '',
-    exito: true
+    mostrar: false, mensaje: '', exito: true
   });
 
   // --- DATOS FIJOS ---
@@ -50,34 +56,57 @@ export class Dashboard implements OnInit {
     { nombre: 'Netflix', icono: 'bxl-netflix', color: 'text-red-600' },
     { nombre: 'Spotify', icono: 'bxl-spotify', color: 'text-green-500' },
     { nombre: 'Mercado', icono: 'bx-cart', color: 'text-orange-500' },
-    { nombre: 'Transporte', icono: 'bx-bus', color: 'text-blue-500' },
+    { nombre: 'Transporte', icono: 'bx-bus', color: 'text-orange-500' },
     { nombre: 'Arriendo', icono: 'bx-home', color: 'text-indigo-500' },
     { nombre: 'Servicios', icono: 'bx-plug', color: 'text-yellow-600' },
     { nombre: 'Salud / EPS', icono: 'bx-plus-medical', color: 'text-teal-500' }
   ];
 
-  // --- FORMULARIO ---
-  nuevaTransaccion = {
-    descripcion: '',
-    monto: 0,
-    tipo: 'GASTO'
-  };
+  nuevaTransaccion = { descripcion: '', monto: 0, tipo: 'GASTO' };
 
   ngOnInit() {
-    this.cargarDatos();
+    this.extraerNombreDelToken();
+    this.verificarCuentas(); 
+  }
+
+  verificarCuentas() {
+    this.cuentaService.getCuentas().subscribe({
+      next: (cuentas) => {
+        if (cuentas.length === 0) {
+          this.sinCuentas.set(true);
+          this.cargando.set(false);
+        } else {
+          // 🟢 Sumamos el saldo base de todas las tarjetas registradas
+          const totalEnCuentas = cuentas.reduce((acumulado, cuenta) => acumulado + Number(cuenta.saldo || 0), 0);
+          this.saldoBaseCuentas.set(totalEnCuentas);
+
+          this.sinCuentas.set(false);
+          this.cargarDatos(); 
+        }
+      },
+      error: (err) => {
+        console.error('Error verificando cuentas:', err);
+        this.cargando.set(false);
+      }
+    });
+  }
+
+  irABilletera() {
+    this.router.navigate(['/billetera']); 
   }
 
   // --- LÓGICA DE DATOS ---
-
   cargarDatos() {
     this.transaccionService.getTransacciones().subscribe({
       next: (transacciones) => {
         this.calcularResumen(transacciones);
         this.actualizarGrafica(transacciones);
+        this.cargando.set(false); 
       },
       error: (err) => {
         console.error('Error al cargar datos:', err);
         this.mostrarAviso('Error al conectar con el servidor', false);
+        this.cargando.set(false);
       }
     });
   }
@@ -99,11 +128,12 @@ export class Dashboard implements OnInit {
 
     this.ingresos.set(sumaIngresos);
     this.gastos.set(sumaGastos);
-    this.saldoTotal.set(sumaIngresos - sumaGastos);
+    
+    // 🟢 MAGIA AQUÍ: Plata Inicial + Ingresos - Gastos
+    this.saldoTotal.set(this.saldoBaseCuentas() + sumaIngresos - sumaGastos);
   }
 
   // --- MOTOR DE LA GRÁFICA ---
-
   actualizarGrafica(transacciones: Transaccion[]) {
     const etiquetas = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
     const dataIngresos = [0, 0, 0, 0, 0, 0];
@@ -123,51 +153,31 @@ export class Dashboard implements OnInit {
       }
     });
 
-    if (this.chart) {
-      this.chart.destroy();
-    }
+    if (this.chart) this.chart.destroy();
 
-    this.chart = new Chart(this.chartCanvas.nativeElement, {
-      type: 'line',
-      data: {
-        labels: etiquetas,
-        datasets: [
-          {
-            label: 'Ingresos',
-            data: dataIngresos,
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16, 185, 129, 0.1)',
-            fill: true,
-            tension: 0.4
+    setTimeout(() => { 
+      if (this.chartCanvas) {
+        this.chart = new Chart(this.chartCanvas.nativeElement, {
+          type: 'line',
+          data: {
+            labels: etiquetas,
+            datasets: [
+              { label: 'Ingresos', data: dataIngresos, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.4 },
+              { label: 'Gastos', data: dataGastos, borderColor: '#f43f5e', backgroundColor: 'rgba(244, 63, 94, 0.1)', fill: true, tension: 0.4 }
+            ]
           },
-          {
-            label: 'Gastos',
-            data: dataGastos,
-            borderColor: '#f43f5e',
-            backgroundColor: 'rgba(244, 63, 94, 0.1)',
-            fill: true,
-            tension: 0.4
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, grid: { display: false }, ticks: { display: false } }, x: { grid: { display: false } } }
           }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { beginAtZero: true, grid: { display: false }, ticks: { display: false } },
-          x: { grid: { display: false } }
-        }
+        });
       }
-    });
+    }, 100);
   }
 
- guardarTransaccion() {
-    console.log('Intentando guardar:', this.nuevaTransaccion);
-
+  guardarTransaccion() {
     const esIngreso = this.nuevaTransaccion.tipo === 'INGRESO';
-    
-    // Formateamos el monto para el aviso
     const montoMsg = this.currencyPipe.transform(this.nuevaTransaccion.monto, 'COP', 'symbol-narrow', '1.0-0');
 
     const transaccionAEnviar: any = {
@@ -175,52 +185,49 @@ export class Dashboard implements OnInit {
       monto: this.nuevaTransaccion.monto,
       fechaTransaccion: new Date().toISOString().split('T')[0],
       tipo: esIngreso ? 'INGRESO' : 'GASTO',
-      categoria: { 
-        id: esIngreso ? 2 : 1,
-        tipo: esIngreso ? 'INGRESO' : 'GASTO'
-      }
+      categoria: { id: esIngreso ? 2 : 1, tipo: esIngreso ? 'INGRESO' : 'GASTO' }
     };
 
     this.transaccionService.crearTransaccion(transaccionAEnviar).subscribe({
-      next: (nueva) => {
+      next: () => {
         this.cerrarModal();
         this.cargarDatos(); 
         this.limpiarFormulario();
-        
-        // 🟢 CORREGIDO: Ahora sí dice la verdad (Si es ingreso -> Ingreso, si no -> Gasto)
         this.mostrarAviso(`${esIngreso ? 'Ingreso' : 'Gasto'} de ${montoMsg} registrado`, true);
       },
       error: (err) => {
-        console.error('Error al guardar:', err);
-        this.mostrarAviso('Error al guardar el movimiento', false);
+        if (err.status === 400 && String(err.error).includes("No tienes tarjetas")) {
+          this.mostrarAviso("¡Pilas! 💳 Primero debes crear una cuenta en la sección de Billeteras", false);
+        } else {
+          this.mostrarAviso("Error al guardar el movimiento", false);
+        }
       }
     });
   }
 
   // --- UI HELPERS ---
-
   mostrarAviso(mensaje: string, exito: boolean) {
     this.notificacion.set({ mostrar: true, mensaje, exito });
-    setTimeout(() => {
-      this.notificacion.update(n => ({ ...n, mostrar: false }));
-    }, 3500);
+    setTimeout(() => this.notificacion.update(n => ({ ...n, mostrar: false })), 3500);
   }
 
-  abrirModal() {
-    this.mostrarModal.set(true);
-  }
+  abrirModal() { this.mostrarModal.set(true); }
+  cerrarModal() { this.notificacion.set({ mostrar: false, mensaje: '', exito: true }); this.mostrarModal.set(false); }
+  limpiarFormulario() { this.nuevaTransaccion = { descripcion: '', monto: 0, tipo: 'GASTO' }; }
+  seleccionarGastoRapido(gasto: any) { this.nuevaTransaccion.descripcion = gasto.nombre; this.nuevaTransaccion.tipo = 'GASTO'; }
 
-  cerrarModal() {
-    this.notificacion.set({ mostrar: false, mensaje: '', exito: true }); // Reseteamos noti al cerrar
-    this.mostrarModal.set(false);
-  }
-
-  limpiarFormulario() {
-    this.nuevaTransaccion = { descripcion: '', monto: 0, tipo: 'GASTO' };
-  }
-
-  seleccionarGastoRapido(gasto: any) {
-    this.nuevaTransaccion.descripcion = gasto.nombre;
-    this.nuevaTransaccion.tipo = 'GASTO';
+  // --- EXTRAER NOMBRE DEL TOKEN ---
+  extraerNombreDelToken() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payloadBase64 = token.split('.')[1];
+        const email = JSON.parse(atob(payloadBase64)).sub; 
+        if (email) {
+          let nombreCortado = email.split('@')[0];
+          this.nombreUsuario = nombreCortado.charAt(0).toUpperCase() + nombreCortado.slice(1);
+        }
+      } catch (e) { this.nombreUsuario = 'Usuario'; }
+    } else { this.nombreUsuario = 'Usuario'; }
   }
 }
