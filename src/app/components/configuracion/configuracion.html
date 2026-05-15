@@ -1,8 +1,8 @@
 <div class="space-y-6 animate-fade-in max-w-4xl mx-auto">
   
   <div>
-    <h2 class="text-3xl font-black text-gray-900 tracking-tight">Configuración</h2>
-    <p class="text-sm text-gray-500 mt-1">Administra tu cuenta y tus preferencias de FinQ</p>
+    <h2 class="text-3xl font-black text-gray-900 tracking-tight">{{ idiomaService.t('CONFIG_TITULO') }}</h2>
+    <p class="text-sm text-gray-500 mt-1">{{ idiomaService.t('CONFIG_SUB') }}</p>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-8">
@@ -11,19 +11,19 @@
       <button (click)="pestanaActiva.set('perfil')" 
               [class.bg-white]="pestanaActiva() === 'perfil'" [class.shadow-sm]="pestanaActiva() === 'perfil'" [class.text-finq-primary]="pestanaActiva() === 'perfil'"
               class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-gray-600 hover:bg-white hover:shadow-sm transition-all text-left">
-        <i class='bx bx-user text-xl'></i> Mi Perfil
+        <i class='bx bx-user text-xl'></i> {{ idiomaService.t('BTN_PERFIL') }}
       </button>
       
       <button (click)="pestanaActiva.set('preferencias')"
               [class.bg-white]="pestanaActiva() === 'preferencias'" [class.shadow-sm]="pestanaActiva() === 'preferencias'" [class.text-finq-primary]="pestanaActiva() === 'preferencias'"
               class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-gray-600 hover:bg-white hover:shadow-sm transition-all text-left">
-        <i class='bx bx-slider-alt text-xl'></i> Preferencias
+        <i class='bx bx-slider-alt text-xl'></i> {{ idiomaService.t('BTN_PREFERENCIAS') }}
       </button>
       
       <button (click)="pestanaActiva.set('seguridad')"
               [class.bg-white]="pestanaActiva() === 'seguridad'" [class.shadow-sm]="pestanaActiva() === 'seguridad'" [class.text-finq-primary]="pestanaActiva() === 'seguridad'"
               class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-gray-600 hover:bg-white hover:shadow-sm transition-all text-left">
-        <i class='bx bx-shield-quarter text-xl'></i> Seguridad
+        <i class='bx bx-shield-quarter text-xl'></i> {{ idiomaService.t('BTN_SEGURIDAD') }}
       </button>
     </div>
 
@@ -62,27 +62,103 @@
         </div>
       }
 
-      @if (pestanaActiva() === 'preferencias' || pestanaActiva() === 'seguridad') {
-        <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm flex flex-col items-center justify-center text-center h-64 animate-slide-up">
-          <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-4">
-            <i class='bx bx-wrench text-3xl'></i>
+      @if (pestanaActiva() === 'preferencias') {
+        <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm animate-slide-up">
+          <h3 class="text-xl font-bold text-gray-900 mb-6">Preferencias de la App</h3>
+          
+          <div class="space-y-6">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Moneda Principal</label>
+              <select [(ngModel)]="preferencias.moneda" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-finq-primary outline-none transition-all font-medium">
+                <option value="COP">Peso Colombiano (COP)</option>
+                <option value="USD">Dólar Estadounidense (USD)</option>
+                <option value="EUR">Euro (EUR)</option>
+                <option value="MXN">Peso Mexicano (MXN)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Idioma</label>
+              <select [(ngModel)]="preferencias.idioma" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-finq-primary outline-none transition-all font-medium">
+                <option value="es">Español</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+
+            <button (click)="guardarPreferencias()" class="mt-4 bg-finq-primary text-white px-6 py-3 rounded-xl text-sm font-bold shadow-lg hover:brightness-110 active:scale-95 transition-all">
+              Guardar Cambios
+            </button>
           </div>
-          <h3 class="text-lg font-bold text-gray-900">Sección en construcción</h3>
-          <p class="text-sm text-gray-500 mt-1 max-w-sm">Pronto podrás modificar tu contraseña y ajustar la moneda de la aplicación.</p>
         </div>
       }
 
-      <div class="bg-rose-50 border border-rose-100 p-8 rounded-3xl">
+      @if (pestanaActiva() === 'seguridad') {
+        <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm animate-slide-up">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">Cambiar Contraseña</h3>
+          <p class="text-sm text-gray-500 mb-6">Asegúrate de usar una contraseña fuerte de al menos 6 caracteres.</p>
+          
+          <form (ngSubmit)="cambiarPassword()" class="space-y-5">
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Contraseña Actual</label>
+              <input type="password" name="passActual" [(ngModel)]="seguridad.passActual" placeholder="••••••••" required
+                     class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-finq-primary outline-none transition-all">
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Nueva Contraseña</label>
+                <input type="password" name="passNuevo" [(ngModel)]="seguridad.passNuevo" placeholder="••••••••" required
+                       class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-finq-primary outline-none transition-all">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 ml-1">Confirmar Nueva</label>
+                <input type="password" name="passConfirmacion" [(ngModel)]="seguridad.passConfirmacion" placeholder="••••••••" required
+                       class="w-full px-4 py-3 bg-gray-50 border border-gray-200 text-gray-800 rounded-xl focus:ring-2 focus:ring-finq-primary outline-none transition-all">
+              </div>
+            </div>
+
+            <button type="submit" class="mt-4 bg-gray-900 text-white px-6 py-3 rounded-xl text-sm font-bold shadow-lg hover:bg-black active:scale-95 transition-all">
+              Actualizar Contraseña
+            </button>
+          </form>
+        </div>
+      }
+
+      <div class="bg-rose-50 border border-rose-100 p-8 rounded-3xl mt-6">
         <h3 class="text-lg font-bold text-rose-900 mb-2 flex items-center gap-2">
-          <i class='bx bx-error-circle'></i> Zona de Peligro
+          <i class='bx bx-error-circle'></i> {{ idiomaService.t('ZONA_PELIGRO') }}
         </h3>
         <p class="text-sm text-rose-700 mb-6">Si estás en un dispositivo público, recuerda cerrar tu sesión al terminar.</p>
         
         <button (click)="cerrarSesion()" class="bg-rose-600 hover:bg-rose-700 text-white px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-lg shadow-rose-200 flex items-center gap-2">
-          <i class='bx bx-log-out text-lg'></i> Cerrar Sesión de FinQ
+          <i class='bx bx-log-out text-lg'></i> {{ idiomaService.t('CERRAR_SESION') }}
         </button>
       </div>
 
     </div>
   </div>
 </div>
+
+@if (notificacion().mostrar) {
+  <div class="fixed top-20 right-4 z-[110] animate-fade-in">
+    <div class="flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border backdrop-blur-md transition-all"
+         [class.bg-emerald-500/90]="notificacion().exito"
+         [class.border-emerald-400]="notificacion().exito"
+         [class.bg-rose-500/90]="!notificacion().exito"
+         [class.border-rose-400]="!notificacion().exito">
+      
+      <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white">
+        <i class='bx' [class.bx-check-circle]="notificacion().exito" [class.bx-error-circle]="!notificacion().exito"></i>
+      </div>
+      
+      <div class="pr-2">
+        <p class="text-[10px] font-black text-white uppercase tracking-widest opacity-80">{{ idiomaService.t('CONFIG_TITULO') }}</p>
+        <p class="text-sm font-bold text-white leading-tight">{{ notificacion().mensaje }}</p>
+      </div>
+
+      <button (click)="notificacion.update(p => ({...p, mostrar: false}))" class="text-white/50 hover:text-white transition-colors">
+        <i class='bx bx-x text-lg'></i>
+      </button>
+    </div>
+  </div>
+}

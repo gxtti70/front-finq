@@ -1,5 +1,5 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http'; // 🟢 Agregamos HttpHeaders
 import { Observable, tap } from 'rxjs';
 
 @Injectable({
@@ -42,6 +42,20 @@ export class AuthService {
     const body = { nombre: nombre, email: correo, password: password };
 
     return this.http.post<any>(`${this.apiUrl}/registro`, body);
+  }
+
+  // 🟢 NUEVO: MÉTODO PARA CAMBIAR CONTRASEÑA
+  cambiarPassword(passActual: string, passNuevo: string): Observable<any> {
+    const token = localStorage.getItem('token');
+    
+    // Armamos la cabecera de seguridad para que Spring Boot nos deje pasar
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
+    
+    // El endpoint queda: http://localhost:8080/api/auth/password
+    return this.http.put<any>(`${this.apiUrl}/password`, 
+      { passActual: passActual, passNuevo: passNuevo }, 
+      { headers: headers }
+    );
   }
 
   // MÉTODO PARA CERRAR SESIÓN
