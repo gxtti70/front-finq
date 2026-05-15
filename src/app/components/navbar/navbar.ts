@@ -1,5 +1,5 @@
-import { Component, signal, OnInit } from '@angular/core'; 
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, signal, OnInit, inject } from '@angular/core'; 
+import { RouterLink, RouterLinkActive, Router } from '@angular/router'; // 🟢 Agregamos Router aquí
 
 @Component({
   selector: 'app-navbar',
@@ -7,20 +7,20 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './navbar.html'
 })
-export class NavbarComponent implements OnInit { 
+export class NavbarComponent implements OnInit {
+  
+  private router = inject(Router); // 🟢 Inyectamos el Router para poder redirigir al login
+
   isProfileMenuOpen = signal(false);
   isMobileMenuOpen = signal(false);
 
-  //Variables para guardar la identidad
   nombreUsuario: string = 'Usuario';
   correoUsuario: string = 'cargando...';
 
-  //Esto se ejecuta apenas el Navbar aparece en pantalla
   ngOnInit() {
     this.extraerInfoDelToken();
   }
 
-  // Funciones para alternar (abrir/cerrar) los menús
   toggleProfileMenu() {
     this.isProfileMenuOpen.update(val => !val);
     if (this.isProfileMenuOpen()) this.isMobileMenuOpen.set(false);
@@ -31,7 +31,6 @@ export class NavbarComponent implements OnInit {
     if (this.isMobileMenuOpen()) this.isProfileMenuOpen.set(false);
   }
 
-  //Función para descifrar el Token y sacar los datos
   extraerInfoDelToken() {
     const token = localStorage.getItem('token');
     
@@ -41,12 +40,10 @@ export class NavbarComponent implements OnInit {
         const payloadDecoded = atob(payloadBase64);
         const payloadJson = JSON.parse(payloadDecoded);
         
-        // El correo original viene en la propiedad "sub"
         const email = payloadJson.sub; 
         
         if (email) {
-          this.correoUsuario = email; // Guardamos el correo completo
-          
+          this.correoUsuario = email; 
           let nombreCortado = email.split('@')[0];
           this.nombreUsuario = nombreCortado.charAt(0).toUpperCase() + nombreCortado.slice(1);
         }
@@ -59,5 +56,12 @@ export class NavbarComponent implements OnInit {
       this.nombreUsuario = 'Usuario';
       this.correoUsuario = 'sin_correo@finq.com';
     }
+  }
+
+  // 🟢 LA FUNCIÓN QUE FALTABA
+  cerrarSesion() {
+    localStorage.removeItem('token'); // Quemamos el carnet
+    this.isProfileMenuOpen.set(false); // Cerramos el menú
+    this.router.navigate(['/login']); // Lo mandamos pa' fuera
   }
 }
