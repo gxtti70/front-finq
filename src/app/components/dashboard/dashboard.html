@@ -178,8 +178,27 @@
 
           <div class="relative">
             <input type="text" name="descripcion" [(ngModel)]="nuevaTransaccion.descripcion" 
+              (input)="nuevaTransaccion.tipo === 'SUSCRIPCION' ? filtrarSugerencias() : null"
+              (focus)="nuevaTransaccion.tipo === 'SUSCRIPCION' ? mostrarSugerencias.set(true) : null"
+              (blur)="mostrarSugerencias.set(false)"
               [placeholder]="nuevaTransaccion.tipo === 'SUSCRIPCION' ? 'Nombre del servicio (ej: Netflix)' : 'Concepto (ej: Pago Nómina)'" required
+              autocomplete="off"
               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-finq-primary/10 focus:border-finq-primary outline-none transition-all text-sm font-medium">
+
+            @if (nuevaTransaccion.tipo === 'SUSCRIPCION' && mostrarSugerencias() && sugerenciasFiltradas().length > 0) {
+              <div class="absolute left-0 right-0 mt-1.5 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 max-h-48 overflow-y-auto divide-y divide-gray-50 animate-fade-in">
+                <div class="px-3 py-1.5 bg-gray-50/50 text-[9px] font-black tracking-wider text-gray-400 uppercase sticky top-0 backdrop-blur-md">
+                  Sugerencias Populares
+                </div>
+                @for (sug of sugerenciasFiltradas(); track sug) {
+                  <button type="button" (mousedown)="seleccionarSugerencia(sug)"
+                    class="w-full text-left px-4 py-2.5 hover:bg-indigo-50/60 text-xs font-bold text-gray-700 hover:text-finq-primary transition-colors flex items-center justify-between group">
+                    <span>{{ sug }}</span>
+                    <i class='bx bx-plus text-gray-400 group-hover:text-finq-primary transition-colors text-sm'></i>
+                  </button>
+                }
+              </div>
+            }
           </div>
 
           @if (nuevaTransaccion.tipo === 'SUSCRIPCION') {

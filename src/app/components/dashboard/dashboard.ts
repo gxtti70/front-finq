@@ -34,7 +34,7 @@ export class Dashboard implements OnInit {
   cargando = signal<boolean>(true); 
   sinCuentas = signal<boolean>(false); 
 
-  saldoBaseCuentas = signal<number>(0); // 🟢 Aquí guardamos la suma de las tarjetas
+  saldoBaseCuentas = signal<number>(0); // Suma de las tarjetas
 
   saldoTotal = signal<number>(0);
   ingresos = signal<number>(0);
@@ -48,13 +48,12 @@ export class Dashboard implements OnInit {
   // --- DATOS DINÁMICOS ---
   gastosAplicaciones = signal<any[]>([]);
 
-  // 🟢 Expandimos el objeto para soportar los campos requeridos por Suscripcion.java
   nuevaTransaccion = { 
     descripcion: '', 
     monto: 0, 
-    tipo: 'GASTO', // Puede ser: 'GASTO' | 'INGRESO' | 'SUSCRIPCION'
+    tipo: 'GASTO', // 'GASTO' | 'INGRESO' | 'SUSCRIPCION'
     cicloFacturacion: 'MENSUAL',
-    proximoCobro: new Date().toISOString().split('T')[0] // Por defecto el día de hoy (YYYY-MM-DD)
+    proximoCobro: new Date().toISOString().split('T')[0]
   };
 
   gastosRapidos = [
@@ -66,6 +65,48 @@ export class Dashboard implements OnInit {
     { nombre: 'Servicios', icono: 'bx-plug', color: 'text-yellow-600' },
     { nombre: 'Salud / EPS', icono: 'bx-plus-medical', color: 'text-teal-500' }
   ];
+
+  // --- AUTOCOMPLETADO DE SUSCRIPCIONES ---
+  mostrarSugerencias = signal<boolean>(false);
+
+  suscripcionesPopulares: string[] = [
+    'Netflix', 'Spotify', 'Amazon Prime', 'Disney+', 'Max (HBO)', 
+    'YouTube Premium', 'Apple iCloud', 'Apple Music', 'ChatGPT Plus', 
+    'Xbox Game Pass', 'PlayStation Plus', 'Crunchyroll', 'Canva', 
+    'Adobe Creative Cloud', 'Duolingo', 'Starlink', 'GitHub Copilot'
+  ];
+
+  sugerenciasFiltradas = signal<string[]>([...this.suscripcionesPopulares]);
+
+  filtrarSugerencias() {
+    const busqueda = this.nuevaTransaccion.descripcion.toLowerCase().trim();
+    
+    if (!busqueda) {
+      this.sugerenciasFiltradas.set(this.suscripcionesPopulares);
+    } else {
+      const filtradas = this.suscripcionesPopulares.filter(suscripcion =>
+        suscripcion.toLowerCase().includes(busqueda)
+      );
+      this.sugerenciasFiltradas.set(filtradas);
+    }
+  }
+
+  seleccionarSugerencia(nombre: string) {
+    this.nuevaTransaccion.descripcion = nombre;
+    this.mostrarSugerencias.set(false);
+  }
+
+  limpiarFormulario() { 
+    this.nuevaTransaccion = { 
+      descripcion: '', 
+      monto: 0, 
+      tipo: 'GASTO',
+      cicloFacturacion: 'MENSUAL',
+      proximoCobro: new Date().toISOString().split('T')[0]
+    }; 
+    this.mostrarSugerencias.set(false);
+    this.sugerenciasFiltradas.set([...this.suscripcionesPopulares]);
+  }
 
   ngOnInit() {
     this.extraerNombreDelToken();
@@ -177,15 +218,13 @@ export class Dashboard implements OnInit {
     }, 100);
   }
 
-  // 🟢 ENRUTADOR PRINCIPAL DEL GUARDADO
+  // --- ACCIONES DEL FORMULARIO ---
   guardarTransaccion() {
-    // Si seleccionó tipo SUSCRIPCION, desviamos el flujo a su respectiva lógica
     if (this.nuevaTransaccion.tipo === 'SUSCRIPCION') {
       this.guardarSuscripcionReal();
       return;
     }
 
-    // Flujo normal para INGRESO o GASTO (Transacciones estándares)
     const esIngreso = this.nuevaTransaccion.tipo === 'INGRESO';
     const montoMsg = this.currencyPipe.transform(this.nuevaTransaccion.monto, 'COP', 'symbol-narrow', '1.0-0');
 
@@ -214,13 +253,11 @@ export class Dashboard implements OnInit {
     });
   }
 
-  // 🟢 NUEVA LÓGICA: Procesar y guardar la Suscripción en el Backend
   guardarSuscripcionReal() {
     const montoMsg = this.currencyPipe.transform(this.nuevaTransaccion.monto, 'COP', 'symbol-narrow', '1.0-0');
 
-    // Mapeamos los datos del formulario a las propiedades que requiere Suscripcion.java
     const suscripcionAEnviar: any = {
-      nombre: this.nuevaTransaccion.descripcion, // Usamos la descripción del input como nombre
+      nombre: this.nuevaTransaccion.descripcion,
       monto: this.nuevaTransaccion.monto,
       cicloFacturacion: this.nuevaTransaccion.cicloFacturacion,
       proximoCobro: this.nuevaTransaccion.proximoCobro,
@@ -230,7 +267,7 @@ export class Dashboard implements OnInit {
     this.suscripcionService.crearSuscripcion(suscripcionAEnviar).subscribe({
       next: () => {
         this.cerrarModal();
-        this.cargarDatos(); // Volverá a llamar automáticamente a cargarSuscripcionesReales()
+        this.cargarDatos();
         this.limpiarFormulario();
         this.mostrarAviso(`Suscripción a ${suscripcionAEnviar.nombre} de ${montoMsg} guardada exitosamente`, true);
       },
@@ -250,18 +287,10 @@ export class Dashboard implements OnInit {
   abrirModal() { this.mostrarModal.set(true); }
   cerrarModal() { this.notificacion.set({ mostrar: false, mensaje: '', exito: true }); this.mostrarModal.set(false); }
   
-  // 🟢 Actualizamos el reset del formulario para los nuevos campos
-  limpiarFormulario() { 
-    this.nuevaTransaccion = { 
-      descripcion: '', 
-      monto: 0, 
-      tipo: 'GASTO',
-      cicloFacturacion: 'MENSUAL',
-      proximoCobro: new Date().toISOString().split('T')[0]
-    }; 
+  seleccionarGastoRapido(gasto: any) { 
+    this.nuevaTransaccion.descripcion = gasto.nombre; 
+    this.nuevaTransaccion.tipo = 'GASTO'; 
   }
-  
-  seleccionarGastoRapido(gasto: any) { this.nuevaTransaccion.descripcion = gasto.nombre; this.nuevaTransaccion.tipo = 'GASTO'; }
 
   // --- EXTRAER NOMBRE DEL TOKEN ---
   extraerNombreDelToken() {
