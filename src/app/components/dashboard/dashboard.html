@@ -122,7 +122,9 @@
       </div>
     </div>
   </div>
-} @if (mostrarModal()) {
+}
+
+@if (mostrarModal()) {
   <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in">
     <div class="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden animate-slide-up">
       <div class="flex justify-between items-center p-6 border-b border-gray-50">
@@ -145,30 +147,60 @@
               }
             </div>
           </div>
+
           <div>
             <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2 text-center">Tipo de operación</label>
-            <div class="flex p-1.5 bg-gray-100 rounded-2xl">
+            <div class="flex p-1.5 bg-gray-100 rounded-2xl gap-1">
                 
               <label class="flex-1 text-center cursor-pointer">
                 <input type="radio" name="tipo" [(ngModel)]="nuevaTransaccion.tipo" value="INGRESO" class="peer sr-only">
-                <div class="py-2.5 rounded-xl text-xs font-black text-gray-500 peer-checked:bg-white peer-checked:text-emerald-600 peer-checked:shadow-sm transition-all flex items-center justify-center gap-2">
-                  <i class='bx bx-plus-circle text-lg'></i> Ingreso
+                <div class="py-2.5 rounded-xl text-xs font-black text-gray-500 peer-checked:bg-white peer-checked:text-emerald-600 peer-checked:shadow-sm transition-all flex items-center justify-center gap-1">
+                  <i class='bx bx-plus-circle text-base'></i> Ingreso
                 </div>
               </label>
 
               <label class="flex-1 text-center cursor-pointer">
                 <input type="radio" name="tipo" [(ngModel)]="nuevaTransaccion.tipo" value="GASTO" class="peer sr-only">
-                <div class="py-2.5 rounded-xl text-xs font-black text-gray-500 peer-checked:bg-white peer-checked:text-rose-600 peer-checked:shadow-sm transition-all flex items-center justify-center gap-2">
-                  <i class='bx bx-minus-circle text-lg'></i> Gasto
+                <div class="py-2.5 rounded-xl text-xs font-black text-gray-500 peer-checked:bg-white peer-checked:text-rose-600 peer-checked:shadow-sm transition-all flex items-center justify-center gap-1">
+                  <i class='bx bx-minus-circle text-base'></i> Gasto
+                </div>
+              </label>
+
+              <label class="flex-1 text-center cursor-pointer">
+                <input type="radio" name="tipo" [(ngModel)]="nuevaTransaccion.tipo" value="SUSCRIPCION" class="peer sr-only">
+                <div class="py-2.5 rounded-xl text-xs font-black text-gray-500 peer-checked:bg-white peer-checked:text-indigo-600 peer-checked:shadow-sm transition-all flex items-center justify-center gap-1">
+                  <i class='bx bx-refresh text-base animate-pulse'></i> Suscripción
                 </div>
               </label>
               
             </div>
           </div>
+
           <div class="relative">
-            <input type="text" name="descripcion" [(ngModel)]="nuevaTransaccion.descripcion" placeholder="Concepto (ej: Pago Nómina)" required
+            <input type="text" name="descripcion" [(ngModel)]="nuevaTransaccion.descripcion" 
+              [placeholder]="nuevaTransaccion.tipo === 'SUSCRIPCION' ? 'Nombre del servicio (ej: Netflix)' : 'Concepto (ej: Pago Nómina)'" required
               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-finq-primary/10 focus:border-finq-primary outline-none transition-all text-sm font-medium">
           </div>
+
+          @if (nuevaTransaccion.tipo === 'SUSCRIPCION') {
+            <div class="grid grid-cols-2 gap-4 animate-fade-in">
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Ciclo de cobro</label>
+                <select name="cicloFacturacion" [(ngModel)]="nuevaTransaccion.cicloFacturacion"
+                  class="w-full px-3 py-2.5 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-finq-primary/10 focus:border-finq-primary outline-none transition-all text-xs font-bold text-gray-700">
+                  <option value="MENSUAL">Mensual</option>
+                  <option value="ANUAL">Anual</option>
+                  <option value="SEMANAL">Semanal</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Próximo Cobro</label>
+                <input type="date" name="proximoCobro" [(ngModel)]="nuevaTransaccion.proximoCobro" required
+                  class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-2xl focus:bg-white focus:ring-4 focus:ring-finq-primary/10 focus:border-finq-primary outline-none transition-all text-xs font-bold text-gray-700">
+              </div>
+            </div>
+          }
+
           <div class="relative">
             <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
               <span class="text-gray-400 font-bold">$</span>
