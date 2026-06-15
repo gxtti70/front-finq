@@ -7,6 +7,7 @@ import { TransaccionService } from '../../services/transaccion';
 import { CuentaService } from '../../services/cuenta.service'; 
 import { Transaccion } from '../../models/transaccion';
 import { Chart, registerables } from 'chart.js';
+import { SuscripcionService } from '../../services/suscripcion.service';
 
 Chart.register(...registerables);
 
@@ -22,6 +23,7 @@ export class Dashboard implements OnInit {
   private cuentaService = inject(CuentaService); 
   private router = inject(Router); 
   private currencyPipe = inject(CurrencyPipe);
+  private suscripcionService = inject(SuscripcionService);
   
   nombreUsuario: string = 'Usuario';
 
@@ -44,23 +46,8 @@ export class Dashboard implements OnInit {
   });
 
   // --- DATOS FIJOS ---
-  gastosAplicaciones = signal([
-    { nombre: 'Netflix', plan: 'Premium', monto: 45000, icono: '', imgUrl: 'https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/227_Netflix_logo-512.png', color: '', bg: 'bg-red-50' },
-    { nombre: 'Spotify', plan: 'Duo', monto: 21400, icono: 'bxl-spotify', imgUrl: '', color: 'text-green-500', bg: 'bg-green-50' },
-    { nombre: 'Amazon', plan: 'Prime Video', monto: 25000, icono: 'bxl-amazon', imgUrl: '', color: 'text-gray-800', bg: 'bg-gray-100' },
-    { nombre: 'Apple', plan: 'iCloud+', monto: 12900, icono: 'bxl-apple', imgUrl: '', color: 'text-gray-900', bg: 'bg-gray-200' },
-    { nombre: 'YouTube', plan: 'Premium', monto: 17900, icono: 'bxl-youtube', imgUrl: '', color: 'text-red-600', bg: 'bg-red-50' }
-  ]);
+gastosAplicaciones = signal<any[]>([]);
 
-  gastosRapidos = [
-    { nombre: 'Netflix', icono: 'bxl-netflix', color: 'text-red-600' },
-    { nombre: 'Spotify', icono: 'bxl-spotify', color: 'text-green-500' },
-    { nombre: 'Mercado', icono: 'bx-cart', color: 'text-orange-500' },
-    { nombre: 'Transporte', icono: 'bx-bus', color: 'text-orange-500' },
-    { nombre: 'Arriendo', icono: 'bx-home', color: 'text-indigo-500' },
-    { nombre: 'Servicios', icono: 'bx-plug', color: 'text-yellow-600' },
-    { nombre: 'Salud / EPS', icono: 'bx-plus-medical', color: 'text-teal-500' }
-  ];
 
   nuevaTransaccion = { descripcion: '', monto: 0, tipo: 'GASTO' };
 
@@ -97,19 +84,23 @@ export class Dashboard implements OnInit {
 
   // --- LÓGICA DE DATOS ---
   cargarDatos() {
-    this.transaccionService.getTransacciones().subscribe({
-      next: (transacciones) => {
-        this.calcularResumen(transacciones);
-        this.actualizarGrafica(transacciones);
-        this.cargando.set(false); 
-      },
-      error: (err) => {
-        console.error('Error al cargar datos:', err);
-        this.mostrarAviso('Error al conectar con el servidor', false);
-        this.cargando.set(false);
-      }
-    });
-  }
+  // 1. Carga las transacciones y la gráfica (lo que ya tenías)
+  this.transaccionService.getTransacciones().subscribe({
+    next: (transacciones) => {
+      this.calcularResumen(transacciones);
+      this.actualizarGrafica(transacciones);
+      this.cargando.set(false); 
+    },
+    error: (err) => {
+      console.error('Error al cargar datos:', err);
+      this.mostrarAviso('Error al conectar con el servidor', false);
+      this.cargando.set(false);
+    }
+  });
+
+  // 2. Agrega esta línea mágica para traer las suscripciones reales de la BD
+  this.cargarSuscripcionesReales();
+}
 
   calcularResumen(transacciones: Transaccion[]) {
     let sumaIngresos = 0;
@@ -230,4 +221,39 @@ export class Dashboard implements OnInit {
       } catch (e) { this.nombreUsuario = 'Usuario'; }
     } else { this.nombreUsuario = 'Usuario'; }
   }
+  cargarSuscripcionesReales() {
+  this.suscripcionService.getSuscripciones().subscribe({
+    next: (suscripciones) => {
+      // Mapeamos los datos del backend para inyectarle los estilos del diseño
+      const datosMapeados = suscripciones.map(sub => {
+        const nombreLower = sub.nombre.toLowerCase();
+
+        if (nombreLower.includes('netflix')) {
+          return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: '', imgUrl: 'https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/227_Netflix_logo-512.png', color: '', bg: 'bg-red-50' };
+        }
+        if (nombreLower.includes('spotify')) {
+          return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-spotify', imgUrl: '', color: 'text-green-500', bg: 'bg-green-50' };
+        }
+        if (nombreLower.includes('amazon') || nombreLower.includes('prime')) {
+          return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-amazon', imgUrl: '', color: 'text-gray-800', bg: 'bg-gray-100' };
+        }
+        if (nombreLower.includes('apple') || nombreLower.includes('icloud')) {
+          return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-apple', imgUrl: '', color: 'text-gray-900', bg: 'bg-gray-200' };
+        }
+        if (nombreLower.includes('youtube')) {
+          return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-youtube', imgUrl: '', color: 'text-red-600', bg: 'bg-red-50' };
+        }
+
+        // Comodín por si en el futuro creas una suscripción personalizada en la app
+        return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bx-credit-card', imgUrl: '', color: 'text-indigo-600', bg: 'bg-indigo-50' };
+      });
+
+      // Actualizamos el Signal con la información real procesada
+      this.gastosAplicaciones.set(datosMapeados);
+    },
+    error: (err) => {
+      console.error('Error al cargar las suscripciones del backend:', err);
+    }
+  });
+}
 }
