@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, ViewChild, ElementRef } from '@angul
 import { CurrencyPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router'; 
+import { forkJoin } from 'rxjs';
 
 import { TransaccionService } from '../../services/transaccion';
 import { CuentaService } from '../../services/cuenta.service'; 
@@ -139,26 +140,36 @@ export class Dashboard implements OnInit {
 
   // --- LÓGICA DE DATOS ---
   cargarDatos() {
-    this.transaccionService.getTransacciones().subscribe({
-      next: (transacciones) => {
-        this.calcularResumen(transacciones);
+    // forkJoin ejecuta ambas peticiones en paralelo y espera a que terminen las dos
+    forkJoin({
+      transacciones: this.transaccionService.getTransacciones(),
+      suscripciones: this.suscripcionService.getSuscripciones()
+    }).subscribe({
+      next: ({ transacciones, suscripciones }) => {
+        // 1. Procesamos las suscripciones para renderizarlas en la lista con sus logos
+        this.procesarSuscripcionesLista(suscripciones);
+
+        // 2. Calculamos el resumen global sumando transacciones normales + suscripciones
+        this.calcularResumen(transacciones, suscripciones);
+
+        // 3. Dibujamos la gráfica analítica
         this.actualizarGrafica(transacciones);
+
         this.cargando.set(false); 
       },
       error: (err) => {
-        console.error('Error al cargar datos:', err);
+        console.error('Error al cargar datos del dashboard:', err);
         this.mostrarAviso('Error al conectar con el servidor', false);
         this.cargando.set(false);
       }
     });
-
-    this.cargarSuscripcionesReales();
   }
 
-  calcularResumen(transacciones: Transaccion[]) {
+  calcularResumen(transacciones: Transaccion[], suscripciones: any[]) {
     let sumaIngresos = 0;
     let sumaGastos = 0;
 
+    // 1. Sumar transacciones estándar (Ingresos y Gastos comunes)
     transacciones.forEach(t => {
       const monto = Number(t.monto) || 0;
       const tipoReal = t.categoria?.tipo?.toUpperCase().trim() || t.tipo?.toUpperCase().trim();
@@ -170,9 +181,43 @@ export class Dashboard implements OnInit {
       }
     });
 
+    // 2. Sumar las suscripciones fijas como parte de los Gastos del mes
+    suscripciones.forEach(sub => {
+      if (sub.activa) { // Opcional: Solo si manejas bandera de activa/inactiva
+        sumaGastos += Number(sub.monto) || 0;
+      }
+    });
+
+    // 3. Sincronizar las señales reactivas de la UI
     this.ingresos.set(sumaIngresos);
     this.gastos.set(sumaGastos);
     this.saldoTotal.set(this.saldoBaseCuentas() + sumaIngresos - sumaGastos);
+  }
+
+  procesarSuscripcionesLista(suscripciones: any[]) {
+    const datosMapeados = suscripciones.map(sub => {
+      const nombreLower = sub.nombre.toLowerCase();
+
+      if (nombreLower.includes('netflix')) {
+        return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: '', imgUrl: 'https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/227_Netflix_logo-512.png', color: '', bg: 'bg-red-50' };
+      }
+      if (nombreLower.includes('spotify')) {
+        return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-spotify', imgUrl: '', color: 'text-green-500', bg: 'bg-green-50' };
+      }
+      if (nombreLower.includes('amazon') || nombreLower.includes('prime')) {
+        return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-amazon', imgUrl: '', color: 'text-gray-800', bg: 'bg-gray-100' };
+      }
+      if (nombreLower.includes('apple') || nombreLower.includes('icloud')) {
+        return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-apple', imgUrl: '', color: 'text-gray-900', bg: 'bg-gray-200' };
+      }
+      if (nombreLower.includes('youtube')) {
+        return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-youtube', imgUrl: '', color: 'text-red-600', bg: 'bg-red-50' };
+      }
+
+      return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bx-credit-card', imgUrl: '', color: 'text-indigo-600', bg: 'bg-indigo-50' };
+    });
+
+    this.gastosAplicaciones.set(datosMapeados);
   }
 
   // --- MOTOR DE LA GRÁFICA ---
