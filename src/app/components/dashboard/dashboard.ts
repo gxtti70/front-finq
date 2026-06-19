@@ -58,13 +58,14 @@ export class Dashboard implements OnInit {
   };
 
   gastosRapidos = [
-    { nombre: 'Netflix', icono: 'bxl-netflix', color: 'text-red-600' },
-    { nombre: 'Spotify', icono: 'bxl-spotify', color: 'text-green-500' },
-    { nombre: 'Mercado', icono: 'bx-cart', color: 'text-orange-500' },
-    { nombre: 'Transporte', icono: 'bx-bus', color: 'text-orange-500' },
-    { nombre: 'Arriendo', icono: 'bx-home', color: 'text-indigo-500' },
-    { nombre: 'Servicios', icono: 'bx-plug', color: 'text-yellow-600' },
-    { nombre: 'Salud / EPS', icono: 'bx-plus-medical', color: 'text-teal-500' }
+    { nombre: 'Comida', icono: 'bx-restaurant' },
+    { nombre: 'Transporte', icono: 'bx-car' },
+    { nombre: 'Café', icono: 'bx-coffee' },
+    { nombre: 'Mercado', icono: 'bx-shopping-bag' },
+    { nombre: 'Entretenimiento', icono: 'bx-film' },
+    { nombre: 'Hogar', icono: 'bx-home-alt' },
+    { nombre: 'Salud', icono: 'bx-heart' },
+    { nombre: 'Otros', icono: 'bx-dots-horizontal-rounded' }
   ];
 
   // --- AUTOCOMPLETADO DE SUSCRIPCIONES ---
