@@ -3,6 +3,7 @@ import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { TransaccionService } from '../../services/transaccion';
 import { Transaccion } from '../../models/transaccion';
+import * as XLSX from 'xlsx'; 
 
 @Component({
   selector: 'app-movimientos',
@@ -16,7 +17,7 @@ export class Movimientos implements OnInit {
   historial = signal<Transaccion[]>([]);
   cargando = signal(true);
 
-  // --- NUEVO: Signal para el Modal ---
+  // --- Signal para el Modal ---
   transaccionSeleccionada = signal<Transaccion | null>(null);
 
   filtroTexto = signal('');
@@ -73,6 +74,28 @@ export class Movimientos implements OnInit {
       },
       error: () => this.cargando.set(false)
     });
+  }
+
+  // 🟢 NUEVO: Método para exportar a Excel respetando los filtros activos
+  exportarAExcel() {
+    if (this.movimientosFiltrados().length === 0) return;
+
+    // Mapeo estructurado para que las columnas del Excel queden limpias y estéticas
+    const datosExportar = this.movimientosFiltrados().map(mov => ({
+      'Fecha': new Date(mov.fechaTransaccion).toLocaleDateString('es-CO'),
+      'Descripción / Concepto': mov.descripcion,
+      'Tipo': (mov.categoria?.tipo || mov.tipo || '').toUpperCase().trim(),
+      'Monto (COP)': mov.monto
+    }));
+
+    // Generación del libro de Excel
+    const worksheet = XLSX.utils.json_to_sheet(datosExportar);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Movimientos Filtrados');
+
+    // Descarga automatizada con la fecha actual en el nombre del archivo
+    const fechaArchivo = new Date().toISOString().slice(0, 10);
+    XLSX.writeFile(workbook, `FinQ_Reporte_Movimientos_${fechaArchivo}.xlsx`);
   }
 
   // --- FUNCIONES DEL MODAL ---
