@@ -28,15 +28,14 @@ export class Dashboard implements OnInit {
   
   nombreUsuario: string = 'Usuario';
 
-  @ViewChild('finqChart') chartCanvas!: ElementRef;
+  @ViewChild('finqChart') chartCanvas!: ElementRef<HTMLCanvasElement>;
   chart: any;
 
   // --- ESTADOS DE LA UI ---
   cargando = signal<boolean>(true); 
   sinCuentas = signal<boolean>(false); 
 
-  saldoBaseCuentas = signal<number>(0); // Suma de las tarjetas
-
+  saldoBaseCuentas = signal<number>(0); 
   saldoTotal = signal<number>(0);
   ingresos = signal<number>(0);
   gastos = signal<number>(0);
@@ -47,12 +46,13 @@ export class Dashboard implements OnInit {
   });
 
   // --- DATOS DINÁMICOS ---
+  transaccionesRaw = signal<Transaccion[]>([]); // <- Guardado estratégico para poder exportar después sin volver al backend
   gastosAplicaciones = signal<any[]>([]);
 
   nuevaTransaccion = { 
     descripcion: '', 
     monto: 0, 
-    tipo: 'GASTO', // 'GASTO' | 'INGRESO' | 'SUSCRIPCION'
+    tipo: 'GASTO', 
     cicloFacturacion: 'MENSUAL',
     proximoCobro: new Date().toISOString().split('T')[0]
   };
@@ -80,17 +80,18 @@ export class Dashboard implements OnInit {
 
   sugerenciasFiltradas = signal<string[]>([...this.suscripcionesPopulares]);
 
+  ngOnInit() {
+    this.extraerNombreDelToken();
+    this.verificarCuentas(); 
+  }
+
   filtrarSugerencias() {
     const busqueda = this.nuevaTransaccion.descripcion.toLowerCase().trim();
-    
-    if (!busqueda) {
-      this.sugerenciasFiltradas.set(this.suscripcionesPopulares);
-    } else {
-      const filtradas = this.suscripcionesPopulares.filter(suscripcion =>
-        suscripcion.toLowerCase().includes(busqueda)
-      );
-      this.sugerenciasFiltradas.set(filtradas);
-    }
+    this.sugerenciasFiltradas.set(
+      busqueda 
+        ? this.suscripcionesPopulares.filter(s => s.toLowerCase().includes(busqueda))
+        : [...this.suscripcionesPopulares]
+    );
   }
 
   seleccionarSugerencia(nombre: string) {
@@ -110,19 +111,14 @@ export class Dashboard implements OnInit {
     this.sugerenciasFiltradas.set([...this.suscripcionesPopulares]);
   }
 
-  ngOnInit() {
-    this.extraerNombreDelToken();
-    this.verificarCuentas(); 
-  }
-
   verificarCuentas() {
     this.cuentaService.getCuentas().subscribe({
       next: (cuentas) => {
-        if (cuentas.length === 0) {
+        if (!cuentas || cuentas.length === 0) {
           this.sinCuentas.set(true);
           this.cargando.set(false);
         } else {
-          const totalEnCuentas = cuentas.reduce((acumulado, cuenta) => acumulado + Number(cuenta.saldo || 0), 0);
+          const totalEnCuentas = cuentas.reduce((acc, c) => acc + Number(c.saldo || 0), 0);
           this.saldoBaseCuentas.set(totalEnCuentas);
           this.sinCuentas.set(false);
           this.cargarDatos(); 
@@ -141,21 +137,15 @@ export class Dashboard implements OnInit {
 
   // --- LÓGICA DE DATOS ---
   cargarDatos() {
-    // forkJoin ejecuta ambas peticiones en paralelo y espera a que terminen las dos
     forkJoin({
       transacciones: this.transaccionService.getTransacciones(),
       suscripciones: this.suscripcionService.getSuscripciones()
     }).subscribe({
       next: ({ transacciones, suscripciones }) => {
-        // 1. Procesamos las suscripciones para renderizarlas en la lista con sus logos
+        this.transaccionesRaw.set(transacciones); // Almacenamos la data fresca
         this.procesarSuscripcionesLista(suscripciones);
-
-        // 2. Calculamos el resumen global sumando transacciones normales + suscripciones
         this.calcularResumen(transacciones, suscripciones);
-
-        // 3. Dibujamos la gráfica analítica
         this.actualizarGrafica(transacciones);
-
         this.cargando.set(false); 
       },
       error: (err) => {
@@ -170,52 +160,41 @@ export class Dashboard implements OnInit {
     let sumaIngresos = 0;
     let sumaGastos = 0;
 
-    // 1. Sumar transacciones estándar (Ingresos y Gastos comunes)
     transacciones.forEach(t => {
       const monto = Number(t.monto) || 0;
       const tipoReal = t.categoria?.tipo?.toUpperCase().trim() || t.tipo?.toUpperCase().trim();
-
-      if (tipoReal === 'INGRESO') {
-        sumaIngresos += monto;
-      } else {
-        sumaGastos += monto;
-      }
+      tipoReal === 'INGRESO' ? (sumaIngresos += monto) : (sumaGastos += monto);
     });
 
-    // 2. Sumar las suscripciones fijas como parte de los Gastos del mes
     suscripciones.forEach(sub => {
-      if (sub.activa) { // Opcional: Solo si manejas bandera de activa/inactiva
-        sumaGastos += Number(sub.monto) || 0;
-      }
+      if (sub.activa) sumaGastos += Number(sub.monto) || 0;
     });
 
-    // 3. Sincronizar las señales reactivas de la UI
     this.ingresos.set(sumaIngresos);
     this.gastos.set(sumaGastos);
     this.saldoTotal.set(this.saldoBaseCuentas() + sumaIngresos - sumaGastos);
   }
 
   procesarSuscripcionesLista(suscripciones: any[]) {
+    const diccionarioLogos: Record<string, { icono: string, imgUrl: string, color: string, bg: string }> = {
+      netflix: { icono: '', imgUrl: 'https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/227_Netflix_logo-512.png', color: '', bg: 'bg-red-50' },
+      spotify: { icono: 'bxl-spotify', imgUrl: '', color: 'text-green-500', bg: 'bg-green-50' },
+      amazon: { icono: 'bxl-amazon', imgUrl: '', color: 'text-gray-800', bg: 'bg-gray-100' },
+      prime: { icono: 'bxl-amazon', imgUrl: '', color: 'text-gray-800', bg: 'bg-gray-100' },
+      apple: { icono: 'bxl-apple', imgUrl: '', color: 'text-gray-900', bg: 'bg-gray-200' },
+      icloud: { icono: 'bxl-apple', imgUrl: '', color: 'text-gray-900', bg: 'bg-gray-200' },
+      youtube: { icono: 'bxl-youtube', imgUrl: '', color: 'text-red-600', bg: 'bg-red-50' }
+    };
+
     const datosMapeados = suscripciones.map(sub => {
       const nombreLower = sub.nombre.toLowerCase();
+      const coincidencia = Object.keys(diccionarioLogos).find(key => nombreLower.includes(key));
+      
+      const estiloicos = coincidencia 
+        ? diccionarioLogos[coincidencia] 
+        : { icono: 'bx-credit-card', imgUrl: '', color: 'text-indigo-600', bg: 'bg-indigo-50' };
 
-      if (nombreLower.includes('netflix')) {
-        return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: '', imgUrl: 'https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/227_Netflix_logo-512.png', color: '', bg: 'bg-red-50' };
-      }
-      if (nombreLower.includes('spotify')) {
-        return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-spotify', imgUrl: '', color: 'text-green-500', bg: 'bg-green-50' };
-      }
-      if (nombreLower.includes('amazon') || nombreLower.includes('prime')) {
-        return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-amazon', imgUrl: '', color: 'text-gray-800', bg: 'bg-gray-100' };
-      }
-      if (nombreLower.includes('apple') || nombreLower.includes('icloud')) {
-        return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-apple', imgUrl: '', color: 'text-gray-900', bg: 'bg-gray-200' };
-      }
-      if (nombreLower.includes('youtube')) {
-        return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-youtube', imgUrl: '', color: 'text-red-600', bg: 'bg-red-50' };
-      }
-
-      return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bx-credit-card', imgUrl: '', color: 'text-indigo-600', bg: 'bg-indigo-50' };
+      return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, ...estiloicos };
     });
 
     this.gastosAplicaciones.set(datosMapeados);
@@ -233,11 +212,7 @@ export class Dashboard implements OnInit {
       
       if (mesIdx < 6) {
         const tipoReal = t.categoria?.tipo?.toUpperCase().trim() || t.tipo?.toUpperCase().trim();
-        if (tipoReal === 'INGRESO') {
-          dataIngresos[mesIdx] += Number(t.monto);
-        } else {
-          dataGastos[mesIdx] += Number(t.monto);
-        }
+        tipoReal === 'INGRESO' ? (dataIngresos[mesIdx] += Number(t.monto)) : (dataGastos[mesIdx] += Number(t.monto));
       }
     });
 
@@ -262,6 +237,58 @@ export class Dashboard implements OnInit {
         });
       }
     }, 100);
+  }
+
+  // --- EXPORTACIONES NATIVAS (A lo senior flojo: sin dependencias pesadas de terceros) ---
+  exportarAExcel(): void {
+    const transacciones = this.transaccionesRaw();
+    if (transacciones.length === 0 && this.gastosAplicaciones().length === 0) {
+      this.mostrarAviso('No hay datos disponibles para exportar', false);
+      return;
+    }
+
+    const encabezados = ['Fecha', 'Concepto/Descripcion', 'Tipo Movimiento', 'Monto (COP)', 'Frecuencia/Categoria'];
+    
+    // Mapeamos transacciones de cuenta
+    const filasTransacciones = transacciones.map(t => [
+      t.fechaTransaccion || new Date().toLocaleDateString(),
+      t.descripcion,
+      t.categoria?.tipo?.toUpperCase().trim() || t.tipo?.toUpperCase().trim() || 'GASTO',
+      t.monto,
+      t.categoria?.nombre || 'General'
+    ]);
+
+    // Agregamos también las suscripciones fijas actuales para un reporte integral
+    const filasSuscripciones = this.gastosAplicaciones().map(sub => [
+      'Fijo Mensual',
+      `Suscripción Fija: ${sub.nombre}`,
+      'GASTO',
+      sub.monto,
+      sub.plan
+    ]);
+
+    // Combinamos todo, inyectamos BOM UTF-8 y separamos con ";" para que Excel en español separe celdas mágicamente
+    const contenidoCsv = [encabezados.join(';'), ...[...filasTransacciones, ...filasSuscripciones].map(f => f.join(';'))].join('\n');
+    const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), contenidoCsv], { type: 'text/csv;charset=utf-8;' });
+    
+    this.ejecutarDescargaDOM(URL.createObjectURL(blob), `FinQ_Reporte_${new Date().toISOString().slice(0,10)}.csv`);
+  }
+
+  descargarGrafica(): void {
+    if (!this.chartCanvas) return;
+    // Captura el base64 del canvas renderizado nativamente por Chart.js
+    const urlImagen = this.chartCanvas.nativeElement.toDataURL('image/png');
+    this.ejecutarDescargaDOM(urlImagen, `FinQ_Flujo_Efectivo_${new Date().toISOString().slice(0,10)}.png`);
+  }
+
+  private ejecutarDescargaDOM(url: string, nombreArchivo: string): void {
+    const enlace = document.createElement('a');
+    enlace.href = url;
+    enlace.download = nombreArchivo;
+    document.body.appendChild(enlace);
+    enlace.click();
+    document.body.removeChild(enlace);
+    if (url.startsWith('blob:')) URL.revokeObjectURL(url);
   }
 
   // --- ACCIONES DEL FORMULARIO ---
@@ -324,7 +351,7 @@ export class Dashboard implements OnInit {
     });
   }
 
-  // --- UI HELPERS ---
+  //helpers
   mostrarAviso(mensaje: string, exito: boolean) {
     this.notificacion.set({ mostrar: true, mensaje, exito });
     setTimeout(() => this.notificacion.update(n => ({ ...n, mostrar: false })), 3500);
@@ -338,51 +365,25 @@ export class Dashboard implements OnInit {
     this.nuevaTransaccion.tipo = 'GASTO'; 
   }
 
-  // --- EXTRAER NOMBRE DEL TOKEN ---
+  //extraer nombre del token
   extraerNombreDelToken() {
     const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const payloadBase64 = token.split('.')[1];
-        const email = JSON.parse(atob(payloadBase64)).sub; 
-        if (email) {
-          let nombreCortado = email.split('@')[0];
-          this.nombreUsuario = nombreCortado.charAt(0).toUpperCase() + nombreCortado.slice(1);
-        }
-      } catch (e) { this.nombreUsuario = 'Usuario'; }
-    } else { this.nombreUsuario = 'Usuario'; }
+    if (!token) { this.nombreUsuario = 'Usuario'; return; }
+    try {
+      const payloadBase64 = token.split('.')[1];
+      const email = JSON.parse(atob(payloadBase64)).sub; 
+      if (email) {
+        let nombreCortado = email.split('@')[0];
+        this.nombreUsuario = nombreCortado.charAt(0).toUpperCase() + nombreCortado.slice(1);
+      }
+    } catch (e) { this.nombreUsuario = 'Usuario'; }
   }
 
   cargarSuscripcionesReales() {
+    // Reutiliza la función de procesamiento existente en lugar de duplicar 30 líneas de mapeo idéntico
     this.suscripcionService.getSuscripciones().subscribe({
-      next: (suscripciones) => {
-        const datosMapeados = suscripciones.map(sub => {
-          const nombreLower = sub.nombre.toLowerCase();
-
-          if (nombreLower.includes('netflix')) {
-            return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: '', imgUrl: 'https://cdn4.iconfinder.com/data/icons/logos-and-brands/512/227_Netflix_logo-512.png', color: '', bg: 'bg-red-50' };
-          }
-          if (nombreLower.includes('spotify')) {
-            return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-spotify', imgUrl: '', color: 'text-green-500', bg: 'bg-green-50' };
-          }
-          if (nombreLower.includes('amazon') || nombreLower.includes('prime')) {
-            return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-amazon', imgUrl: '', color: 'text-gray-800', bg: 'bg-gray-100' };
-          }
-          if (nombreLower.includes('apple') || nombreLower.includes('icloud')) {
-            return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-apple', imgUrl: '', color: 'text-gray-900', bg: 'bg-gray-200' };
-          }
-          if (nombreLower.includes('youtube')) {
-            return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bxl-youtube', imgUrl: '', color: 'text-red-600', bg: 'bg-red-50' };
-          }
-
-          return { nombre: sub.nombre, plan: sub.cicloFacturacion, monto: sub.monto, icono: 'bx-credit-card', imgUrl: '', color: 'text-indigo-600', bg: 'bg-indigo-50' };
-        });
-
-        this.gastosAplicaciones.set(datosMapeados);
-      },
-      error: (err) => {
-        console.error('Error al cargar las suscripciones del backend:', err);
-      }
+      next: (suscripciones) => this.procesarSuscripcionesLista(suscripciones),
+      error: (err) => console.error('Error al cargar las suscripciones del backend:', err)
     });
   }
 }
