@@ -16,7 +16,7 @@ export class AuthComponent {
   errorMessage = signal('');
   isLoading = signal(false);
 
-  // 🟢 NUEVO: Signal para controlar si se muestra el popup de éxito
+  // Signal para controlar si se muestra el popup de éxito
   showSuccessModal = signal(false);
 
   authData = {
@@ -37,7 +37,7 @@ export class AuthComponent {
     this.authData = { nombre: '', correo: '', password: '', confirmPassword: '' };
   }
 
-  // 🟢 NUEVO: Función para cerrar el modal y pasarlo a iniciar sesión
+  // Función para cerrar el modal y pasarlo a iniciar sesión
   closeModalAndLogin() {
     this.showSuccessModal.set(false);
     this.toggleMode(); // Cambiamos la vista a login
@@ -55,10 +55,11 @@ export class AuthComponent {
           this.isLoading.set(false);
           this.router.navigate(['/dashboard']);
         },
-        error: (error) => {
+        error: (err) => {
           // Si Spring Boot responde con error (código 400/403)
           this.isLoading.set(false);
-          this.errorMessage.set(error.error?.mensaje || 'Correo o contraseña incorrectos.');
+          // Corregido: Manejo seguro del mensaje de error de la API
+          this.errorMessage.set(err.error || err.message || 'Correo o contraseña incorrectos.');
         }
       });
 
@@ -67,18 +68,19 @@ export class AuthComponent {
       if (this.authData.password !== this.authData.confirmPassword) {
         this.errorMessage.set('Las contraseñas no coinciden.');
         this.isLoading.set(false);
-        return; // Detenemos la ejecución aquí
+        return; 
       }
 
       this.authService.registro(this.authData.nombre, this.authData.correo, this.authData.password).subscribe({
         next: (respuesta) => {
           this.isLoading.set(false);
-          // 🟢 MAGIA: En lugar del alert, prendemos el modal de éxito
+          // Prendemos el modal de éxito
           this.showSuccessModal.set(true); 
         },
-        error: (error) => {
+        error: (err) => {
           this.isLoading.set(false);
-          this.errorMessage.set(error.error?.mensaje || 'Error al registrar. Es posible que el correo ya esté en uso.');
+          // Corregido: Manejo seguro del error de duplicados en Render
+          this.errorMessage.set(err.error || 'Error al registrar. Es posible que el correo ya esté en uso.');
         }
       });
     }
