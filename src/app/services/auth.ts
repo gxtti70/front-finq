@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { BASE_URL } from './api.config'; // 🚀 Importamos tu URL de Render
+import { BASE_URL } from './api.config';
 
 @Injectable({
   providedIn: 'root'
@@ -9,8 +9,7 @@ import { BASE_URL } from './api.config'; // 🚀 Importamos tu URL de Render
 export class AuthService {
   // Signal para saber si el usuario está logueado en cualquier parte de la app
   currentUser = signal<any>(null);
-
-  // Ahora apunta dinámicamente a Render: https://back-finq.onrender.com/api/auth
+  
   private apiUrl = `${BASE_URL}/api/auth`;
 
   // Inyectamos HttpClient por constructor
