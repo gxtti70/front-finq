@@ -1,6 +1,7 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http'; // 🟢 Agregamos HttpHeaders
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
+import { BASE_URL } from './api.config'; // 🚀 Importamos tu URL de Render
 
 @Injectable({
   providedIn: 'root'
@@ -9,12 +10,12 @@ export class AuthService {
   // Signal para saber si el usuario está logueado en cualquier parte de la app
   currentUser = signal<any>(null);
 
-  // La URL base de tu backend en Spring Boot
-  private apiUrl = 'http://localhost:8080/api/auth';
+  // Ahora apunta dinámicamente a Render: https://back-finq.onrender.com/api/auth
+  private apiUrl = `${BASE_URL}/api/auth`;
 
-  // Inyectamos HttpClient de forma clásica por constructor para evitar errores de TypeScript
+  // Inyectamos HttpClient por constructor
   constructor(private http: HttpClient) { 
-    // Magia: Si el usuario recarga la página, buscamos si ya tenía un token guardado
+    // Si el usuario recarga la página, buscamos si ya tenía un token guardado
     const token = localStorage.getItem('token');
     if (token) {
       this.currentUser.set({ token: token });
@@ -23,12 +24,11 @@ export class AuthService {
 
   // MÉTODO DE LOGIN REAL
   login(correo: string, password: string): Observable<any> {
-    // Empaquetamos los datos. Nota: mandamos 'email' porque así lo espera Spring Boot
     const body = { email: correo, password: password };
 
     return this.http.post<any>(`${this.apiUrl}/login`, body).pipe(
       tap((respuesta) => {
-        // Cuando Spring Boot responde con éxito, guardamos el Token en el almacenamiento del navegador
+        // Guardamos el Token en el almacenamiento del navegador
         localStorage.setItem('token', respuesta.token);
         // Actualizamos nuestra variable global
         this.currentUser.set({ correo: correo, token: respuesta.token });
@@ -38,20 +38,18 @@ export class AuthService {
 
   // MÉTODO DE REGISTRO REAL
   registro(nombre: string, correo: string, password: string): Observable<any> {
-    // Empaquetamos los datos para el DTO de Spring Boot
     const body = { nombre: nombre, email: correo, password: password };
 
     return this.http.post<any>(`${this.apiUrl}/registro`, body);
   }
 
-  // 🟢 NUEVO: MÉTODO PARA CAMBIAR CONTRASEÑA
+  // MÉTODO PARA CAMBIAR CONTRASEÑA
   cambiarPassword(passActual: string, passNuevo: string): Observable<any> {
     const token = localStorage.getItem('token');
     
-    // Armamos la cabecera de seguridad para que Spring Boot nos deje pasar
+    // Armamos la cabecera de seguridad con el JWT
     const headers = new HttpHeaders().set('Authorization', `Bearer ${token}`);
     
-    // El endpoint queda: http://localhost:8080/api/auth/password
     return this.http.put<any>(`${this.apiUrl}/password`, 
       { passActual: passActual, passNuevo: passNuevo }, 
       { headers: headers }
